@@ -65,7 +65,7 @@ class DjangoAggregateRecorder(AggregateRecorder):
                 originator_id=r.originator_id,
                 originator_version=r.originator_version,
                 topic=r.topic,
-                state=r.state,
+                state=bytes(r.state) if isinstance(r.state, memoryview) else r.state,
             )
             for r in f
         ]
@@ -94,7 +94,7 @@ class DjangoApplicationRecorder(DjangoAggregateRecorder, ApplicationRecorder):
                 originator_id=r.originator_id,
                 originator_version=r.originator_version,
                 topic=r.topic,
-                state=r.state,
+                state=bytes(r.state) if isinstance(r.state, memoryview) else r.state,
             )
             for r in f[0:limit]
         ]
