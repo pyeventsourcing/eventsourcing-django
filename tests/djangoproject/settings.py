@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -76,15 +76,35 @@ WSGI_APPLICATION = "djangoproject.wsgi.application"
 
 DATABASES = {
     "default": {
+        "ENGINE": os.getenv("DJANGO_DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.getenv("DJANGO_DB_NAME", BASE_DIR / "db.sqlite3"),
+        "TEST": {
+            "NAME": os.getenv("DJANGO_DB_TEST_NAME", None),
+        },
+        "HOST": os.getenv("DJANGO_DB_HOST", None),
+        "PORT": os.getenv("DJANGO_DB_PORT", None),
+        "USER": os.getenv("DJANGO_DB_USER", None),
+        "PASSWORD": os.getenv("DJANGO_DB_PASSWORD", None),
+    },
+    "sqlite_filedb": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+        "TEST": {
+            "NAME": BASE_DIR / "test_db.sqlite3",
+        },
     },
-    "OPTIONS": {
-        # ...
-        "timeout": 20,
-        # ...
-    },
+    "postgres": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
+        "NAME": "eventsourcingdjango",
+        "USER": os.getenv("POSTGRES_USER", "eventsourcing"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
+    }
 }
+
+
+# DATABASES = {
+# }
 
 
 # Password validation
