@@ -1,6 +1,8 @@
 # Event Sourcing in Python with Django
 
-This package supports using the Python [eventsourcing](https://github.com/johnbywater/eventsourcing) library with [Django](https://www.djangoproject.com/).
+This package is a Django app that supports using the Python
+[eventsourcing](https://github.com/johnbywater/eventsourcing) library
+with the [Django ORM](https://www.djangoproject.com/).
 
 ## Installation
 
@@ -60,29 +62,31 @@ import os
 import django
 from django.core.management import call_command
 
-
+# Set DJANGO_SETTINGS_MODULE. 
 os.environ.update({
     "DJANGO_SETTINGS_MODULE": "tests.djangoproject.settings",
 })
 
+# Setup Django.
 django.setup()
 
+# Setup the database.
 call_command('migrate', 'eventsourcing_django')
 ```
 
-Set up environment variables for the event sourcing application.
+Set the `INFRASTRUCTURE_FACTORY` environment variable so that application
+uses the Django ORM for storing events.
 
 ```python
-
 os.environ.update({
     "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
 })
-
 ```
 
-The application environment variable can be used with others supported
-by the library, for example to enable application-level compression and
-encryption of stored events, set `COMPRESSOR_TOPIC` and `CIPHER_KEY`.
+The application's environment can use with other environment variables
+supported by the library, for example to enable application-level
+compression and encryption of stored events, set `COMPRESSOR_TOPIC`
+and `CIPHER_KEY`.
 
 ```python
 from eventsourcing.cipher import AESCipher
@@ -98,20 +102,22 @@ os.environ.update({
 })
 ```
 
-
 Construct and use the application.
 
 ```python
+# Construct the application.
 app = Worlds()
+
+# Call application command methods.
 world_id = app.create_world()
 app.make_it_so(world_id, "dinosaurs")
 app.make_it_so(world_id, "trucks")
 app.make_it_so(world_id, "internet")
 
+# Call application query methods.
 history = app.get_world_history(world_id)
 assert history == ["dinosaurs", "trucks", "internet"]
 ```
-
 
 We can see the application is using the Django infrastructure,
 and that compression and encryption are enabled, by checking the
