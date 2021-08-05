@@ -25,7 +25,7 @@ from eventsourcing.persistence import (
     Tracking,
 )
 
-from eventsourcingdjango.models import NotificationTrackingRecord
+from eventsourcing_django.models import NotificationTrackingRecord
 
 
 from django.db.backends.signals import connection_created

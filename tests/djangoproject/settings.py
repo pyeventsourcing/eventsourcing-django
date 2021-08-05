@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "eventsourcingdjango.apps.EventsourcingConfig",
+    "eventsourcing_django.apps.EventsourcingConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -96,7 +96,7 @@ DATABASES = {
     "postgres": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
-        "NAME": "eventsourcingdjango",
+        "NAME": "eventsourcing_django",
         "USER": os.getenv("POSTGRES_USER", "eventsourcing"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
     }

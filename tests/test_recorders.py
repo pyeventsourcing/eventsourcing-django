@@ -2,8 +2,8 @@ from django.db import connection
 from django.test import TransactionTestCase
 from eventsourcing.tests.test_postgres import pg_close_all_connections
 
-from eventsourcingdjango.models import SnapshotRecord, StoredEventRecord
-from eventsourcingdjango.recorders import (
+from eventsourcing_django.models import SnapshotRecord, StoredEventRecord
+from eventsourcing_django.recorders import (
     DjangoAggregateRecorder,
     DjangoApplicationRecorder,
     DjangoProcessRecorder,
@@ -76,7 +76,7 @@ class TestDjangoApplicationRecorderWithPostgres(TestDjangoApplicationRecorder):
         # otherwise Django can't tear down the database.
         super().tearDownClass()
         pg_close_all_connections(
-            name="test_eventsourcingdjango",
+            name="test_eventsourcing_django",
         )
 
 

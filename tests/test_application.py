@@ -10,12 +10,12 @@ from tests.test_recorders import DjangoTestCase
 
 class TestApplicationWithDjango(DjangoTestCase, TestApplicationWithPOPO):
     timeit_number = 5 * TIMEIT_FACTOR
-    expected_factory_topic = "eventsourcingdjango.factory:Factory"
+    expected_factory_topic = "eventsourcing_django.factory:Factory"
     django_db_alias = ""
 
     def setUp(self) -> None:
         super().setUp()
-        os.environ["INFRASTRUCTURE_FACTORY"] = "eventsourcingdjango.factory:Factory"
+        os.environ["INFRASTRUCTURE_FACTORY"] = "eventsourcing_django.factory:Factory"
         os.environ["DJANGO_DB_ALIAS"] = self.django_db_alias
 
     def tearDown(self) -> None:

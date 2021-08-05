@@ -6,8 +6,8 @@ from eventsourcing.tests.infrastructure_testcases import (
 )
 from eventsourcing.utils import get_topic
 
-from eventsourcingdjango.factory import Factory
-from eventsourcingdjango.recorders import (
+from eventsourcing_django.factory import Factory
+from eventsourcing_django.recorders import (
     DjangoAggregateRecorder,
     DjangoApplicationRecorder,
     DjangoProcessRecorder,

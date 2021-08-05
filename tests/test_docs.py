@@ -4,11 +4,11 @@ from os.path import dirname, join
 from subprocess import PIPE, Popen
 from tempfile import NamedTemporaryFile
 
-import eventsourcingdjango
+import eventsourcing_django
 
 from tests.test_recorders import DjangoTestCase
 
-base_dir = dirname(dirname(os.path.abspath(eventsourcingdjango.__file__)))
+base_dir = dirname(dirname(os.path.abspath(eventsourcing_django.__file__)))
 
 
 class TestExample(DjangoTestCase):
@@ -42,7 +42,7 @@ class TestExample(DjangoTestCase):
 
         app = Worlds(
             env={
-                "INFRASTRUCTURE_FACTORY": "eventsourcingdjango.factory:Factory",
+                "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
             }
         )
         world_id = app.create_world()

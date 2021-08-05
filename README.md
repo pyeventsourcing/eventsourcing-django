@@ -67,7 +67,7 @@ os.environ.update({
 
 django.setup()
 
-call_command('migrate', 'eventsourcingdjango')
+call_command('migrate', 'eventsourcing_django')
 ```
 
 Set up environment variables for the event sourcing application.
@@ -75,7 +75,7 @@ Set up environment variables for the event sourcing application.
 ```python
 
 os.environ.update({
-    "INFRASTRUCTURE_FACTORY": "eventsourcingdjango.factory:Factory",
+    "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
 })
 
 ```
@@ -118,11 +118,11 @@ and that compression and encryption are enabled, by checking the
 attributes of the application object.
 
 ```python
-from eventsourcingdjango.factory import Factory
-from eventsourcingdjango.recorders import DjangoAggregateRecorder
-from eventsourcingdjango.recorders import DjangoApplicationRecorder
-from eventsourcingdjango.models import StoredEventRecord
-from eventsourcingdjango.models import SnapshotRecord
+from eventsourcing_django.factory import Factory
+from eventsourcing_django.recorders import DjangoAggregateRecorder
+from eventsourcing_django.recorders import DjangoApplicationRecorder
+from eventsourcing_django.models import StoredEventRecord
+from eventsourcing_django.models import SnapshotRecord
 import zlib
 
 assert isinstance(app.factory, Factory)

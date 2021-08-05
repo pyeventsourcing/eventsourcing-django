@@ -7,8 +7,8 @@ from eventsourcing.persistence import (
     ProcessRecorder,
 )
 
-from eventsourcingdjango.models import SnapshotRecord, StoredEventRecord
-from eventsourcingdjango.recorders import (
+from eventsourcing_django.models import SnapshotRecord, StoredEventRecord
+from eventsourcing_django.recorders import (
     DjangoAggregateRecorder,
     DjangoApplicationRecorder,
     DjangoProcessRecorder,
