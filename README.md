@@ -41,6 +41,9 @@ class Worlds(Application):
         "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
         "IS_SNAPSHOTTING_ENABLED": "yes",
     }
+    snapshotting_intervals = {
+        World: 5,
+    }
 
     def create_world(self):
         world = World()
@@ -113,10 +116,19 @@ world_id = app.create_world()
 app.make_it_so(world_id, "dinosaurs")
 app.make_it_so(world_id, "trucks")
 app.make_it_so(world_id, "internet")
+app.make_it_so(world_id, "covid")
 
 # Call application query methods.
 history = app.get_world_history(world_id)
-assert history == ["dinosaurs", "trucks", "internet"]
+assert history == ["dinosaurs", "trucks", "internet", "covid"]
+```
+
+We can see the automatic snapshotting is working, by looking
+in the snapshots store.
+
+```python
+snapshots = list(app.snapshots.get(world_id))
+assert len(snapshots) == 1
 ```
 
 We can see the application is using the Django infrastructure,
