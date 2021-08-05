@@ -48,9 +48,7 @@ class SnapshotRecord(models.Model):
     state = models.BinaryField()
 
     class Meta:
-        unique_together = (
-            ("application_name", "originator_id", "originator_version"),
-        )
+        unique_together = (("application_name", "originator_id", "originator_version"),)
         db_table = "snapshots"
 
 

@@ -35,6 +35,7 @@ class TestDjangoAggregateRecorder(DjangoTestCase, AggregateRecorderTestCase):
     def close_db_connection(self, *args):
         connection.close()
 
+
 class TestDjangoSnapshotRecorder(DjangoTestCase, AggregateRecorderTestCase):
     def create_recorder(self):
         return DjangoAggregateRecorder(application_name="app", model=SnapshotRecord)

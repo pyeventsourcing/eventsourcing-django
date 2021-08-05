@@ -99,7 +99,7 @@ DATABASES = {
         "NAME": "eventsourcing_django",
         "USER": os.getenv("POSTGRES_USER", "eventsourcing"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
-    }
+    },
 }
 
 

@@ -33,10 +33,14 @@ class Factory(InfrastructureFactory):
 
     def application_recorder(self) -> ApplicationRecorder:
         return DjangoApplicationRecorder(
-            application_name=self.application_name, model=StoredEventRecord, using=self.db_alias
+            application_name=self.application_name,
+            model=StoredEventRecord,
+            using=self.db_alias,
         )
 
     def process_recorder(self) -> ProcessRecorder:
         return DjangoProcessRecorder(
-            application_name=self.application_name, model=StoredEventRecord, using=self.db_alias
+            application_name=self.application_name,
+            model=StoredEventRecord,
+            using=self.db_alias,
         )

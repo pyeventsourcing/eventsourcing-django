@@ -7,51 +7,57 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='StoredEventRecord',
+            name="StoredEventRecord",
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
-                ('application_name', models.CharField(max_length=32)),
-                ('originator_id', models.UUIDField()),
-                ('originator_version', models.BigIntegerField()),
-                ('topic', models.TextField()),
-                ('state', models.BinaryField()),
+                ("id", models.BigAutoField(primary_key=True, serialize=False)),
+                ("application_name", models.CharField(max_length=32)),
+                ("originator_id", models.UUIDField()),
+                ("originator_version", models.BigIntegerField()),
+                ("topic", models.TextField()),
+                ("state", models.BinaryField()),
             ],
             options={
-                'db_table': 'stored_events',
-                'unique_together': {('application_name', 'id'), ('application_name', 'originator_id', 'originator_version')},
+                "db_table": "stored_events",
+                "unique_together": {
+                    ("application_name", "id"),
+                    ("application_name", "originator_id", "originator_version"),
+                },
             },
         ),
         migrations.CreateModel(
-            name='SnapshotRecord',
+            name="SnapshotRecord",
             fields=[
-                ('uid', models.BigAutoField(primary_key=True, serialize=False)),
-                ('application_name', models.CharField(max_length=32)),
-                ('originator_id', models.UUIDField()),
-                ('originator_version', models.BigIntegerField()),
-                ('topic', models.TextField()),
-                ('state', models.BinaryField()),
+                ("uid", models.BigAutoField(primary_key=True, serialize=False)),
+                ("application_name", models.CharField(max_length=32)),
+                ("originator_id", models.UUIDField()),
+                ("originator_version", models.BigIntegerField()),
+                ("topic", models.TextField()),
+                ("state", models.BinaryField()),
             ],
             options={
-                'db_table': 'snapshots',
-                'unique_together': {('application_name', 'originator_id', 'originator_version')},
+                "db_table": "snapshots",
+                "unique_together": {
+                    ("application_name", "originator_id", "originator_version")
+                },
             },
         ),
         migrations.CreateModel(
-            name='NotificationTrackingRecord',
+            name="NotificationTrackingRecord",
             fields=[
-                ('uid', models.BigAutoField(primary_key=True, serialize=False)),
-                ('application_name', models.CharField(max_length=32)),
-                ('upstream_application_name', models.CharField(max_length=32)),
-                ('notification_id', models.BigIntegerField()),
+                ("uid", models.BigAutoField(primary_key=True, serialize=False)),
+                ("application_name", models.CharField(max_length=32)),
+                ("upstream_application_name", models.CharField(max_length=32)),
+                ("notification_id", models.BigIntegerField()),
             ],
             options={
-                'db_table': 'notification_tracking',
-                'unique_together': {('application_name', 'upstream_application_name', 'notification_id')},
+                "db_table": "notification_tracking",
+                "unique_together": {
+                    ("application_name", "upstream_application_name", "notification_id")
+                },
             },
         ),
     ]

@@ -34,5 +34,4 @@ class TestWithPostgres(TestApplicationWithDjango):
     databases = {"default", "postgres"}
 
 
-
 del TestApplicationWithPOPO
