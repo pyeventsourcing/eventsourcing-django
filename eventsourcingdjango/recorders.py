@@ -117,7 +117,15 @@ class DjangoAggregateRecorder(AggregateRecorder):
     def insert_events(self, stored_events: List[StoredEvent], **kwargs: Any) -> None:
         with self.serialize():
             with transaction.atomic(using=self.using):
+                self._lock_table()
                 self._insert_events(stored_events, **kwargs)
+
+    def _lock_table(self):
+        connection = get_connection(using=self.using)
+        if connection.vendor == "postgresql":
+            cursor = connection.cursor()
+            db_table = self.model._meta.db_table
+            cursor.execute(f"LOCK TABLE {db_table} IN EXCLUSIVE MODE")
 
     def _insert_events(self, stored_events: List[StoredEvent], **kwargs):
         records = []
