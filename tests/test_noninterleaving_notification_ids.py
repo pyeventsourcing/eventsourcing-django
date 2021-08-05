@@ -1,15 +1,7 @@
-from eventsourcing.persistence import ApplicationRecorder
-from eventsourcing.popo import POPOApplicationRecorder
-from eventsourcing.postgres import (
-    PostgresApplicationRecorder,
-    PostgresDatastore,
-)
-from eventsourcing.sqlite import SQLiteApplicationRecorder, SQLiteDatastore
 from eventsourcing.tests.noninterleaving_notification_ids_testcase import (
     NonInterleavingNotificationIDsBaseCase,
 )
-from eventsourcing.tests.ramdisk import tmpfile_uris
-from eventsourcing.tests.test_postgres import drop_postgres_table, pg_close_all_connections
+from eventsourcing.tests.test_postgres import pg_close_all_connections
 
 from eventsourcing_django.models import StoredEventRecord
 from eventsourcing_django.recorders import DjangoApplicationRecorder
