@@ -18,9 +18,9 @@ install Python packages into a Python virtual environment.
 To use Django with your Python eventsourcing application, use the topic `eventsourcing_django.factory:Factory` as the `INFRASTRUCTURE_FACTORY`
 environment variable.
 
-First define a domain model and application, in the usual way.
-
-
+First define a domain model and application, in the usual way. You may set the
+`INFRASTRUCTURE_FACTORY` environment variable on the application class, so it
+can always use the Django ORM for storing events.
 
 ```python
 from eventsourcing.application import Application
@@ -37,8 +37,11 @@ class World(Aggregate):
 
 
 class Worlds(Application):
-    is_snapshotting_enabled = True
-    
+    env = {
+        "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
+        "IS_SNAPSHOTTING_ENABLED": "yes",
+    }
+
     def create_world(self):
         world = World()
         self.save(world)
@@ -54,13 +57,14 @@ class Worlds(Application):
         return world.history
 ```
 
-Setup Django.
+Setup Django, in the usual way.
 
 ```python
 import os
 
 import django
 from django.core.management import call_command
+
 
 # Set DJANGO_SETTINGS_MODULE. 
 os.environ.update({
@@ -74,16 +78,7 @@ django.setup()
 call_command('migrate', 'eventsourcing_django')
 ```
 
-Set the `INFRASTRUCTURE_FACTORY` environment variable so that application
-uses the Django ORM for storing events.
-
-```python
-os.environ.update({
-    "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
-})
-```
-
-The application's environment can use with other environment variables
+The application's environment can use other environment variables
 supported by the library, for example to enable application-level
 compression and encryption of stored events, set `COMPRESSOR_TOPIC`
 and `CIPHER_KEY`.
@@ -102,7 +97,12 @@ os.environ.update({
 })
 ```
 
-Construct and use the application.
+Construct and use the application. You may wish to do this
+within your Django project. The application can be created
+on a signal when the project is ready (use the ready() method
+of the AppConfig class in your Django app's apps.py module).
+The application command and query methods may be called
+from Django view and form classes.
 
 ```python
 # Construct the application.
