@@ -113,7 +113,7 @@ assert history == ["dinosaurs", "trucks", "internet"]
 ```
 
 
-We can see the application is using the SQLAlchemy infrastructure,
+We can see the application is using the Django infrastructure,
 and that compression and encryption are enabled, by checking the
 attributes of the application object.
 
