@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import StoredEventRecord, SnapshotRecord, NotificationTrackingRecord
+from .models import NotificationTrackingRecord, SnapshotRecord, StoredEventRecord
 
 admin.site.register(StoredEventRecord)
 admin.site.register(SnapshotRecord)

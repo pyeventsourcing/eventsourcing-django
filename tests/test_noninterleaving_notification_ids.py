@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from typing import TYPE_CHECKING
+
 from eventsourcing.tests.noninterleaving_notification_ids_testcase import (
     NonInterleavingNotificationIDsBaseCase,
 )
@@ -7,11 +10,14 @@ from eventsourcing_django.models import StoredEventRecord
 from eventsourcing_django.recorders import DjangoApplicationRecorder
 from tests.test_recorders import DjangoTestCase
 
+if TYPE_CHECKING:
+    from typing import Optional
+
 
 class TestNonInterleaving(DjangoTestCase, NonInterleavingNotificationIDsBaseCase):
-    db_alias = None
+    db_alias: Optional[str] = None
 
-    def create_recorder(self):
+    def create_recorder(self) -> DjangoApplicationRecorder:
         return DjangoApplicationRecorder(
             application_name="app", model=StoredEventRecord, using=self.db_alias
         )
@@ -29,7 +35,7 @@ class TestNonInterleavingPostgres(TestNonInterleaving):
     databases = {"default", "postgres"}
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(cls) -> None:
         # Need to close all connections Django made from other threads,
         # otherwise Django can't tear down the database.
         super().tearDownClass()

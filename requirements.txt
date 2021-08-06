@@ -1,2 +1,0 @@
-eventsourcing[crypto]<=9.1.99999
-django<=3.2.99999
