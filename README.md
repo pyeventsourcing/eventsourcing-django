@@ -155,4 +155,3 @@ assert app.mapper.compressor == zlib
 For more information, please refer to the Python
 [eventsourcing](https://github.com/johnbywater/eventsourcing) library
 and the [Django](https://www.djangoproject.com/) project.
-
