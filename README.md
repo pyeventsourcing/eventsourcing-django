@@ -151,3 +151,8 @@ assert issubclass(app.snapshots.recorder.model, SnapshotRecord)
 assert isinstance(app.mapper.cipher, AESCipher)
 assert app.mapper.compressor == zlib
 ```
+
+For more information, please refer to the Python
+[eventsourcing](https://github.com/johnbywater/eventsourcing) library
+and the [Django](https://www.djangoproject.com/) project.
+
