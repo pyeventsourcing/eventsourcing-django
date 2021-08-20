@@ -1,0 +1,104 @@
+[tool.poetry]
+name = "eventsourcing-django"
+version = "0.1.0-alpha.0"
+description = "Python package for eventsourcing with Django."
+authors = [
+    "John Bywater <john.bywater@appropriatesoftware.net>",
+]
+license = "BSD 3-Clause"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Framework :: Django :: 3.2",
+    "Framework :: Django",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python",
+]
+readme = "README.md"
+homepage = "https://eventsourcing.readthedocs.io/"
+repository = "https://github.com/pyeventsourcing/eventsourcing-django"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+Django = "^3.0.0"
+eventsourcing = { version = "^9.0.0", extras = ["crypto"] }
+
+[tool.poetry.dev-dependencies]
+bandit = "*"
+black = { version = "*", allow-prereleases = true }
+flake8 = "*"
+flake8-broken-line = "*"
+flake8-bugbear = "*"
+flake8-coding = "*"
+flake8-isort = "*"
+flake8-tidy-imports = "*"
+isort = "*"
+mypy = "*"
+pre-commit = "*"
+pre-commit-hooks = "*"
+psycopg2-binary = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-django = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ["py38"]
+include = '\.pyi?$'
+experimental-string-processing = true
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.pip-cache
+  | \.poetry
+  | \.venv
+  | \.vscode
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.coverage.run]
+branch = true
+omit = []
+
+[tool.coverage.report]
+exclude_lines = [
+  # Have to re-enable the standard pragma
+  "pragma: no cover",
+  # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self.debug",
+  # Don't complain about some magic methods:
+  "def __str__",
+  # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError",
+  # Don't complain if non-runnable code isn't run:
+  "if 0:",
+  "if __name__ == .__main__.:",
+  # Don't complain about empty realizations
+  "pass",
+  # Don't complain about abstract methods
+  "@abc.abstractmethod"
+]
+ignore_errors = true
+precision = 2
+
+[tool.isort]
+combine_as_imports = true
+profile = "black"
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+skip = ".eggs,.pip-cache,.poetry,venv,.venv,dist"

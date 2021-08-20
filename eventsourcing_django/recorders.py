@@ -1,22 +1,26 @@
+# -*- coding: utf-8 -*-
+from __future__ import annotations
+
 from contextlib import contextmanager
 from functools import wraps
 from threading import Lock
-from typing import Any, List, Optional, Type
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 import django.db
 from django.db import models, transaction
+from django.db.backends.signals import connection_created
 from django.db.transaction import get_connection
 from eventsourcing.persistence import (
     AggregateRecorder,
     ApplicationRecorder,
-    DataError,
     DatabaseError,
+    DataError,
     IntegrityError,
     InterfaceError,
     InternalError,
-    NotSupportedError,
     Notification,
+    NotSupportedError,
     OperationalError,
     PersistenceError,
     ProcessRecorder,
@@ -27,23 +31,26 @@ from eventsourcing.persistence import (
 
 from eventsourcing_django.models import NotificationTrackingRecord
 
+if TYPE_CHECKING:
+    from typing import Any, Dict, Iterator, List, Optional, Type
 
-from django.db.backends.signals import connection_created
+    from django.db import ConnectionProxy
+
+journal_modes: Dict[str, str] = {}
 
 
-journal_modes = {}
-
-
-def detect_sqlite(connection):
+def detect_sqlite(connection: ConnectionProxy) -> bool:
     return connection.vendor == "sqlite"
 
 
-def detect_sqlite_memory_mode(connection):
+def detect_sqlite_memory_mode(connection: ConnectionProxy) -> bool:
     db_name = str(connection.settings_dict["NAME"])
     return ":memory:" in db_name or "mode=memory" in db_name
 
 
-def set_journal_mode_wal_on_sqlite_file_db(sender, connection, **kwargs):
+def set_journal_mode_wal_on_sqlite_file_db(
+    sender: Any, connection: ConnectionProxy, **kwargs: Any
+) -> None:
     """Enable integrity constraint with sqlite."""
     if detect_sqlite(connection) and not detect_sqlite_memory_mode(connection):
         db_name = str(connection.settings_dict["NAME"])
@@ -59,9 +66,9 @@ def set_journal_mode_wal_on_sqlite_file_db(sender, connection, **kwargs):
 connection_created.connect(set_journal_mode_wal_on_sqlite_file_db)
 
 
-def errors(f):
+def errors(f: Any) -> Any:
     @wraps(f)
-    def _wrapper(*args, **kwargs):
+    def _wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return f(*args, **kwargs)
         except django.db.InterfaceError as e:
@@ -98,13 +105,15 @@ class DjangoAggregateRecorder(AggregateRecorder):
         self.model = model
         self.using = using
         connection = get_connection(using=self.using)
+
+        self.lock: Optional[Lock]
         if detect_sqlite(connection) and detect_sqlite_memory_mode(connection):
             self.lock = Lock()
         else:
             self.lock = None
 
     @contextmanager
-    def serialize(self):
+    def serialize(self) -> Iterator[None]:
         try:
             if self.lock:
                 self.lock.acquire()
@@ -120,14 +129,14 @@ class DjangoAggregateRecorder(AggregateRecorder):
                 self._lock_table()
                 self._insert_events(stored_events, **kwargs)
 
-    def _lock_table(self):
+    def _lock_table(self) -> None:
         connection = get_connection(using=self.using)
         if connection.vendor == "postgresql":
             cursor = connection.cursor()
             db_table = self.model._meta.db_table
             cursor.execute(f"LOCK TABLE {db_table} IN EXCLUSIVE MODE")
 
-    def _insert_events(self, stored_events: List[StoredEvent], **kwargs):
+    def _insert_events(self, stored_events: List[StoredEvent], **kwargs: Any) -> None:
         records = []
         for stored_event in stored_events:
             record = self.model(
@@ -210,7 +219,7 @@ class DjangoApplicationRecorder(DjangoAggregateRecorder, ApplicationRecorder):
 
 
 class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
-    def _insert_events(self, stored_events: List[StoredEvent], **kwargs):
+    def _insert_events(self, stored_events: List[StoredEvent], **kwargs: Any) -> None:
         super(DjangoProcessRecorder, self)._insert_events(stored_events, **kwargs)
         tracking: Optional[Tracking] = kwargs.get("tracking", None)
         if tracking is not None:

@@ -1,42 +1,49 @@
+# -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import os
 import sys
 from os.path import dirname, join
-from subprocess import PIPE, Popen
+from subprocess import PIPE, Popen  # nosec
 from tempfile import NamedTemporaryFile
+from typing import TYPE_CHECKING
 
 import eventsourcing_django
-
 from tests.test_recorders import DjangoTestCase
+
+if TYPE_CHECKING:
+    from typing import List
+    from uuid import UUID
 
 base_dir = dirname(dirname(os.path.abspath(eventsourcing_django.__file__)))
 
 
 class TestExample(DjangoTestCase):
-    def test(self):
+    def test(self) -> None:
         from eventsourcing.domain import Aggregate, event
 
         class World(Aggregate):
-            def __init__(self):
-                self.history = []
+            def __init__(self) -> None:
+                self.history: List[str] = []
 
             @event("SomethingHappened")
-            def make_it_so(self, what):
+            def make_it_so(self, what: str) -> None:
                 self.history.append(what)
 
         from eventsourcing.application import Application
 
         class Worlds(Application):
-            def create_world(self):
+            def create_world(self) -> UUID:
                 world = World()
                 self.save(world)
                 return world.id
 
-            def make_it_so(self, world_id, what):
+            def make_it_so(self, world_id: UUID, what: str) -> None:
                 world = self.repository.get(world_id)
                 world.make_it_so(what)
                 self.save(world)
 
-            def get_world_history(self, world_id):
+            def get_world_history(self, world_id: UUID) -> List[str]:
                 world = self.repository.get(world_id)
                 return world.history
 
@@ -51,7 +58,7 @@ class TestExample(DjangoTestCase):
         app.make_it_so(world_id, "internet")
 
         history = app.get_world_history(world_id)
-        assert history == ["dinosaurs", "trucks", "internet"]
+        assert history == ["dinosaurs", "trucks", "internet"]  # nosec
 
 
 class TestDocs(DjangoTestCase):
@@ -61,7 +68,7 @@ class TestDocs(DjangoTestCase):
     def tearDown(self) -> None:
         self.clean_env()
 
-    def clean_env(self):
+    def clean_env(self) -> None:
         keys = [
             "INFRASTRUCTURE_FACTORY",
             "CIPHER_KEY",
@@ -73,7 +80,7 @@ class TestDocs(DjangoTestCase):
             except KeyError:
                 pass
 
-    def test_readme(self):
+    def test_readme(self) -> None:
         self._out = ""
 
         path = join(base_dir, "README.md")
@@ -81,7 +88,7 @@ class TestDocs(DjangoTestCase):
             self.skipTest("Skipped test, README file not found: {}".format(path))
         self.check_code_snippets_in_file(path)
 
-    def check_code_snippets_in_file(self, doc_path):
+    def check_code_snippets_in_file(self, doc_path: str) -> None:  # noqa: C901
         # Extract lines of Python code from the README.md file.
 
         lines = []
@@ -188,18 +195,16 @@ class TestDocs(DjangoTestCase):
         # Run the code and catch errors.
         p = Popen([sys.executable, temp_path], stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
-        out = out.decode("utf8")
-        err = err.decode("utf8")
-        out = out.replace(temp_path, doc_path)
-        err = err.replace(temp_path, doc_path)
+        decoded_out = out.decode("utf8").replace(temp_path, doc_path)
+        decoded_err = err.decode("utf8").replace(temp_path, doc_path)
         exit_status = p.wait()
 
-        print(out)
-        print(err)
+        print(decoded_out)
+        print(decoded_err)
 
         # Check for errors running the code.
         if exit_status:
-            self.fail(out + err)
+            self.fail(decoded_out + decoded_err)
 
         # Close (deletes) the tempfile.
         tempfile.close()
