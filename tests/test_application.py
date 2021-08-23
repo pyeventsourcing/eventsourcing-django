@@ -3,8 +3,9 @@ import os
 
 from eventsourcing.tests.test_application_with_popo import (
     TIMEIT_FACTOR,
-    TestApplicationWithPOPO
+    TestApplicationWithPOPO,
 )
+
 from tests.test_recorders import DjangoTestCase
 
 

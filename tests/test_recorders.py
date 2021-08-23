@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING
 
 from django.db import connection
@@ -79,7 +80,10 @@ class TestDjangoApplicationRecorderWithPostgres(TestDjangoApplicationRecorder):
         # otherwise Django can't tear down the database.
         super().tearDownClass()
         pg_close_all_connections(
-            name="test_eventsourcing_django",
+            host=os.getenv("POSTGRES_HOST", "127.0.0.1"),
+            name="test_" + os.getenv("POSTGRES_DB", "eventsourcing_django"),
+            user=os.getenv("POSTGRES_USER", "eventsourcing"),
+            password=os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
         )
 
 

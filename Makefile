@@ -1,5 +1,8 @@
 .EXPORT_ALL_VARIABLES:
 
+COMPOSE_FILE ?= docker/docker-compose-local.yml
+COMPOSE_PROJECT_NAME ?= eventsourcing_django
+
 POETRY_VERSION = 1.1.8
 POETRY ?= $(HOME)/.poetry/bin/poetry
 
@@ -35,6 +38,31 @@ lock-packages:
 .PHONY: update-packages
 update-packages:
 	$(POETRY) update -vv
+
+.PHONY: docker-up
+docker-up:
+	docker-compose up -d
+	docker-compose ps
+
+.PHONY: docker-down
+docker-down:
+	docker-compose stop
+
+.PHONY: docker-logs
+docker-logs:
+	docker-compose logs --follow
+
+.PHONY: docker-ps
+docker-ps:
+	docker-compose ps
+
+.PHONY: migrate
+migrate:
+	$(POETRY) run django-admin migrate
+
+.PHONY: migrations
+migrations:
+	$(POETRY) run django-admin makemigrations
 
 .PHONY: lint-bandit
 lint-bandit:
@@ -75,4 +103,4 @@ fmt: fmt-black fmt-isort
 
 .PHONY: test
 test:
-	$(POETRY) run pytest $(opts) $(call tests,.)
+	$(POETRY) run python -m pytest $(opts) $(call tests,.)

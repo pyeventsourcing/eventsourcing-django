@@ -103,17 +103,13 @@ DATABASES = {
     },
     "postgres": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
-        "NAME": "eventsourcing_django",
+        "NAME": os.getenv("POSTGRES_DB", "eventsourcing_django"),
         "USER": os.getenv("POSTGRES_USER", "eventsourcing"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
+        "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
     },
 }
-
-
-# DATABASES = {
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators

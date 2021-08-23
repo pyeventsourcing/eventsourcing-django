@@ -3,19 +3,18 @@ from __future__ import annotations
 
 import os
 import sys
-from os.path import dirname, join
+from pathlib import Path
 from subprocess import PIPE, Popen  # nosec
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
-import eventsourcing_django
 from tests.test_recorders import DjangoTestCase
 
 if TYPE_CHECKING:
     from typing import List
     from uuid import UUID
 
-base_dir = dirname(dirname(os.path.abspath(eventsourcing_django.__file__)))
+BASE_DIR = Path.cwd()
 
 
 class TestExample(DjangoTestCase):
@@ -83,12 +82,12 @@ class TestDocs(DjangoTestCase):
     def test_readme(self) -> None:
         self._out = ""
 
-        path = join(base_dir, "README.md")
-        if not os.path.exists(path):
-            self.skipTest("Skipped test, README file not found: {}".format(path))
+        path = BASE_DIR / "README.md"
+        if not path.exists():
+            self.skipTest(f"Skipped test, README file not found: {path}")
         self.check_code_snippets_in_file(path)
 
-    def check_code_snippets_in_file(self, doc_path: str) -> None:  # noqa: C901
+    def check_code_snippets_in_file(self, doc_path: Path) -> None:  # noqa: C901
         # Extract lines of Python code from the README.md file.
 
         lines = []
@@ -99,7 +98,7 @@ class TestDocs(DjangoTestCase):
         is_rst = False
         last_line = ""
         is_literalinclude = False
-        with open(doc_path) as doc_file:
+        with doc_path.open() as doc_file:
             for line_index, orig_line in enumerate(doc_file):
                 line = orig_line.strip("\n")
                 if line.startswith("```python"):
@@ -169,9 +168,8 @@ class TestDocs(DjangoTestCase):
                         if len(line.strip()):
                             if not line.startswith("    "):
                                 self.fail(
-                                    "Code line needs 4-char indent: {}: {}".format(
-                                        repr(line), doc_path
-                                    )
+                                    f"Code line needs 4-char indent: {repr(line)}: "
+                                    f"{doc_path}"
                                 )
                             # Strip four chars of indentation.
                             line = line[4:]
@@ -184,7 +182,7 @@ class TestDocs(DjangoTestCase):
                 lines.append(line)
                 last_line = orig_line
 
-        print("{} lines of code in {}".format(num_code_lines, doc_path))
+        print(f"{num_code_lines} lines of code in {doc_path}")
 
         # Write the code into a temp file.
         tempfile = NamedTemporaryFile("w+")
@@ -192,11 +190,15 @@ class TestDocs(DjangoTestCase):
         tempfile.writelines("\n".join(lines) + "\n")
         tempfile.flush()
 
+        print(Path.cwd())
+        print("\n".join(lines) + "\n")
+
         # Run the code and catch errors.
         p = Popen([sys.executable, temp_path], stdout=PIPE, stderr=PIPE)
+        print(sys.executable, temp_path, PIPE)
         out, err = p.communicate()
-        decoded_out = out.decode("utf8").replace(temp_path, doc_path)
-        decoded_err = err.decode("utf8").replace(temp_path, doc_path)
+        decoded_out = out.decode("utf8").replace(temp_path, str(doc_path))
+        decoded_err = err.decode("utf8").replace(temp_path, str(doc_path))
         exit_status = p.wait()
 
         print(decoded_out)

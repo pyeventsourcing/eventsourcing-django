@@ -1,14 +1,21 @@
 name: CI
-on: pull_request
+on: [push, pull_request]
 
 jobs:
   prepare:
-    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8, 3.9]
+        poetry-version: [1.1.8]
+        django-version: [3.0.14, 3.1.13, 3.2.6]
+        os: [ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python-version }}
       - name: Install and set up Poetry
         run: |
           make install-poetry
@@ -18,9 +25,11 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ matrix.os }}-python-${{ matrix.python-version }}-poetry-${{ matrix.poetry-version }}-django-${{ matrix.django-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install packages
         run: make install-packages opts="--no-root"
+      - name: Install Django
+        run: pip install "Django==${{ matrix.django-version }}"
 
   lint-black:
     runs-on: ubuntu-20.04
@@ -39,7 +48,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
       - name: Lint black
         run: make lint-black
 
@@ -60,7 +69,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
       - name: Lint bandit
         run: make lint-bandit
 
@@ -81,7 +90,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
       - name: Lint flake8
         run: make lint-flake8
 
@@ -102,7 +111,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
       - name: Lint isort
         run: make lint-isort
 
@@ -123,31 +132,54 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
       - name: Lint mypy
         run: make lint-mypy
 
-#  tests:
-#    strategy:
-#      fail-fast: false
-#      matrix:
-#        python-version: [3.9, 3.9]
-#        poetry-version: [1.1.7]
-#        django-version: [3.0.14, 3.1.13, 3.2.6]
-#        os: [ubuntu-20.04, macos-latest, windows-latest]
-#    runs-on: ${{ matrix.os }}
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: actions/setup-python@v2
-#        with:
-#          python-version: ${{ matrix.python-version }}
-#      - name: Run image
-#        uses: abatilo/actions-poetry@v2.0.0
-#        with:
-#          poetry-version: ${{ matrix.poetry-version }}
-#      - name: Install dependencies
-#        run: poetry install
-#      - name: Install Django
-#        run: pip install "Django==${{ matrix.django-version }}"
-#      - name: Run tests
-#        run: make test
+  tests:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8, 3.9]
+        poetry-version: [1.1.8]
+        django-version: [3.0.14, 3.1.13, 3.2.6]
+        os: [ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+    services:
+      postgres:
+        image: postgres:13.4
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd="POSTGRES_PASSWORD=eventsourcing pg_isready -U eventsourcing -d eventsourcing_django"
+          --health-interval="10s"
+          --health-timeout="5s"
+          --health-retries="5"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install and set up Poetry
+        run: |
+          make install-poetry
+          source $HOME/.poetry/env
+          poetry config virtualenvs.in-project true
+      - name: Set up cache
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-${{ matrix.os }}-python-${{ matrix.python-version }}-poetry-${{ matrix.poetry-version }}-django-${{ matrix.django-version }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Run tests
+        run: make test opts="--maxfail=5"
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+          POSTGRES_HOST: 127.0.0.1
+          POSTGRES_PORT: 5432
