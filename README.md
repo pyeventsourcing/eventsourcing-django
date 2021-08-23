@@ -69,9 +69,6 @@ import django
 from django.core.management import call_command
 
 
-print(os.environ)
-
-
 # Set DJANGO_SETTINGS_MODULE.
 os.environ.update({
     "DJANGO_SETTINGS_MODULE": "tests.djangoproject.settings",

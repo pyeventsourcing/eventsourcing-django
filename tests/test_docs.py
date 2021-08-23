@@ -194,7 +194,6 @@ class TestDocs(DjangoTestCase):
         print("\n".join(lines) + "\n")
 
         # Run the code and catch errors.
-        print(os.environ)
         p = Popen([sys.executable, temp_path], stdout=PIPE, stderr=PIPE)
         print(sys.executable, temp_path, PIPE)
         out, err = p.communicate()

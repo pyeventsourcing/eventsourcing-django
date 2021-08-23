@@ -103,4 +103,5 @@ fmt: fmt-black fmt-isort
 
 .PHONY: test
 test:
-	$(POETRY) run python -m pytest $(opts) $(call tests,.)
+#	$(POETRY) run python -m pytest $(opts) $(call tests,.)
+	$(POETRY) run  run ./tests/djangoproject/manage.py test
