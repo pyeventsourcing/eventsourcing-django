@@ -1,0 +1,28 @@
+version: "2.3"
+
+services:
+  # Main persistence database
+  postgres:
+    image: postgres:13.4
+    environment:
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-eventsourcing}"
+      POSTGRES_USER: "${POSTGRES_USER:-eventsourcing}"
+      POSTGRES_DB: "${POSTGRES_DB:-eventsourcing_django}"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "POSTGRES_PASSWORD=$${POSTGRES_PASSWORD:-eventsourcing} pg_isready -U $${POSTGRES_USER:-eventsourcing}"]
+      retries: 5
+      interval: 10s
+      timeout: 5s
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  postgres:
