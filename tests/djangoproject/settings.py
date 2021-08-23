@@ -100,6 +100,11 @@ DATABASES = {
         "TEST": {
             "NAME": BASE_DIR / "test_db.sqlite3",
         },
+        "OPTIONS": {
+            "timeout": 20,  # in seconds
+            # see also
+            # https://docs.python.org/3.7/library/sqlite3.html#sqlite3.connect
+        },
     },
     "postgres": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
