@@ -190,8 +190,12 @@ class TestDocs(DjangoTestCase):
         tempfile.writelines("\n".join(lines) + "\n")
         tempfile.flush()
 
+        print(Path.cwd())
+        print("\n".join(lines) + "\n")
+
         # Run the code and catch errors.
         p = Popen([sys.executable, temp_path], stdout=PIPE, stderr=PIPE)
+        print(sys.executable, temp_path, PIPE)
         out, err = p.communicate()
         decoded_out = out.decode("utf8").replace(temp_path, str(doc_path))
         decoded_err = err.decode("utf8").replace(temp_path, str(doc_path))
