@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import TYPE_CHECKING
+from typing import Optional
 
 from eventsourcing.tests.noninterleaving_notification_ids_testcase import (
     NonInterleavingNotificationIDsBaseCase,
@@ -9,9 +9,6 @@ from eventsourcing.tests.test_postgres import pg_close_all_connections
 from eventsourcing_django.models import StoredEventRecord
 from eventsourcing_django.recorders import DjangoApplicationRecorder
 from tests.test_recorders import DjangoTestCase
-
-if TYPE_CHECKING:
-    from typing import Optional
 
 
 class TestNonInterleaving(DjangoTestCase, NonInterleavingNotificationIDsBaseCase):

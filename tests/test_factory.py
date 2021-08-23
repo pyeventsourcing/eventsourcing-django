@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import os
-from typing import TYPE_CHECKING
+from typing import Type
 
 from eventsourcing.persistence import InfrastructureFactory
 from eventsourcing.tests.infrastructure_testcases import InfrastructureFactoryTestCase
@@ -15,9 +15,6 @@ from eventsourcing_django.recorders import (
     DjangoProcessRecorder,
 )
 from tests.test_recorders import DjangoTestCase
-
-if TYPE_CHECKING:
-    from typing import Type
 
 
 class TestFactory(DjangoTestCase, InfrastructureFactoryTestCase):
