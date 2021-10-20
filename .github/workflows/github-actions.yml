@@ -41,7 +41,6 @@ jobs:
       - name: Install and set up Poetry
         run: |
           make install-poetry
-          source $HOME/.poetry/env
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -62,7 +61,6 @@ jobs:
       - name: Install and set up Poetry
         run: |
           make install-poetry
-          source $HOME/.poetry/env
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -83,7 +81,6 @@ jobs:
       - name: Install and set up Poetry
         run: |
           make install-poetry
-          source $HOME/.poetry/env
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -104,7 +101,6 @@ jobs:
       - name: Install and set up Poetry
         run: |
           make install-poetry
-          source $HOME/.poetry/env
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -125,7 +121,6 @@ jobs:
       - name: Install and set up Poetry
         run: |
           make install-poetry
-          source $HOME/.poetry/env
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -167,7 +162,6 @@ jobs:
       - name: Install and set up Poetry
         run: |
           make install-poetry
-          source $HOME/.poetry/env
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
