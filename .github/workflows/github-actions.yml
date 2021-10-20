@@ -18,7 +18,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install and set up Poetry
         run: |
-          make install-poetry
+          pip install poetry
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -40,7 +40,7 @@ jobs:
           python-version: 3.8
       - name: Install and set up Poetry
         run: |
-          make install-poetry
+          pip install poetry
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -60,7 +60,7 @@ jobs:
           python-version: 3.8
       - name: Install and set up Poetry
         run: |
-          make install-poetry
+          pip install poetry
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -80,7 +80,7 @@ jobs:
           python-version: 3.8
       - name: Install and set up Poetry
         run: |
-          make install-poetry
+          pip install poetry
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -100,7 +100,7 @@ jobs:
           python-version: 3.8
       - name: Install and set up Poetry
         run: |
-          make install-poetry
+          pip install poetry
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -120,7 +120,7 @@ jobs:
           python-version: 3.8
       - name: Install and set up Poetry
         run: |
-          make install-poetry
+          pip install poetry
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
@@ -161,7 +161,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install and set up Poetry
         run: |
-          make install-poetry
+          pip install poetry
           poetry config virtualenvs.in-project true
       - name: Set up cache
         uses: actions/cache@v2
