@@ -19,6 +19,7 @@ POETRY_INSTALLER ?= https://raw.githubusercontent.com/python-poetry/poetry/maste
 .PHONY: install-poetry
 install-poetry:
 	curl -sSL $(POETRY_INSTALLER) | python3
+	$(POETRY) --version
 
 .PHONY: install-packages
 install-packages:
