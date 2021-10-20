@@ -46,7 +46,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.8-${{ hashFiles('**/poetry.lock') }}
       - name: Lint black
         run: make lint-black
 
@@ -66,7 +66,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.8-${{ hashFiles('**/poetry.lock') }}
       - name: Lint bandit
         run: make lint-bandit
 
@@ -86,7 +86,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.8-${{ hashFiles('**/poetry.lock') }}
       - name: Lint flake8
         run: make lint-flake8
 
@@ -106,7 +106,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.8-${{ hashFiles('**/poetry.lock') }}
       - name: Lint isort
         run: make lint-isort
 
@@ -126,7 +126,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.6-${{ hashFiles('**/poetry.lock') }}
+          key: venv-ubuntu-20.04-python-3.8-poetry-1.1.8-django-3.2.8-${{ hashFiles('**/poetry.lock') }}
       - name: Lint mypy
         run: make lint-mypy
 
