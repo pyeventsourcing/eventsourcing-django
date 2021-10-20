@@ -4,19 +4,21 @@ COMPOSE_FILE ?= docker/docker-compose-local.yml
 COMPOSE_PROJECT_NAME ?= eventsourcing_django
 
 POETRY_VERSION = 1.1.8
-POETRY ?= $(HOME)/.poetry/bin/poetry
+POETRY ?= poetry
 
 DJANGO_SETTINGS_MODULE ?= tests.djangoproject.settings
 
 DOTENV_BASE_FILE ?= .env-base
 DOTENV_LOCAL_FILE ?= .env
 
+POETRY_INSTALLER ?= https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
+
 -include $(DOTENV_BASE_FILE)
 -include $(DOTENV_LOCAL_FILE)
 
 .PHONY: install-poetry
 install-poetry:
-	curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+	curl -sSL $(POETRY_INSTALLER) | python3
 
 .PHONY: install-packages
 install-packages:
@@ -103,5 +105,4 @@ fmt: fmt-black fmt-isort
 
 .PHONY: test
 test:
-#	$(POETRY) run python -m pytest $(opts) $(call tests,.)
-	$(POETRY) run ./tests/djangoproject/manage.py test
+	$(POETRY) run python -m pytest $(opts) $(call tests,.)

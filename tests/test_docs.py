@@ -31,7 +31,7 @@ class TestExample(DjangoTestCase):
 
         from eventsourcing.application import Application
 
-        class Worlds(Application):
+        class Worlds(Application[World]):
             def create_world(self) -> UUID:
                 world = World()
                 self.save(world)

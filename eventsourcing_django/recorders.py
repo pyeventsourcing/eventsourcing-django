@@ -72,23 +72,23 @@ def errors(f: Any) -> Any:
         try:
             return f(*args, **kwargs)
         except django.db.InterfaceError as e:
-            raise InterfaceError(e)
+            raise InterfaceError from e
         except django.db.DataError as e:
-            raise DataError(e)
+            raise DataError from e
         except django.db.OperationalError as e:
-            raise OperationalError(e)
+            raise OperationalError from e
         except django.db.IntegrityError as e:
-            raise IntegrityError(e)
+            raise IntegrityError from e
         except django.db.InternalError as e:
-            raise InternalError(e)
+            raise InternalError from e
         except django.db.ProgrammingError as e:
-            raise ProgrammingError(e)
+            raise ProgrammingError from e
         except django.db.NotSupportedError as e:
-            raise NotSupportedError(e)
+            raise NotSupportedError from e
         except django.db.DatabaseError as e:
-            raise DatabaseError(e)
+            raise DatabaseError from e
         except django.db.Error as e:
-            raise PersistenceError(e)
+            raise PersistenceError from e
 
     return _wrapper
 
