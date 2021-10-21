@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "eventsourcing-django"
-version = "0.1.0-alpha.0"
+version = "0.1.0"
 description = "Python package for eventsourcing with Django."
 authors = [
     "John Bywater <john.bywater@appropriatesoftware.net>",
 ]
 license = "BSD 3-Clause"
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Framework :: Django :: 3.2",
     "Framework :: Django",
     "License :: OSI Approved :: BSD License",
