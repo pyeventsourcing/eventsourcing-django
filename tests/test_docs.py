@@ -14,7 +14,8 @@ if TYPE_CHECKING:
     from typing import List
     from uuid import UUID
 
-BASE_DIR = Path.cwd()
+
+BASE_DIR = Path(__file__).parents[1]
 
 
 class TestExample(DjangoTestCase):
@@ -84,7 +85,7 @@ class TestDocs(DjangoTestCase):
 
         path = BASE_DIR / "README.md"
         if not path.exists():
-            self.skipTest(f"Skipped test, README file not found: {path}")
+            self.fail(f"Skipped test, README file not found: {path}")
         self.check_code_snippets_in_file(path)
 
     def check_code_snippets_in_file(self, doc_path: Path) -> None:  # noqa: C901
@@ -194,7 +195,12 @@ class TestDocs(DjangoTestCase):
         print("\n".join(lines) + "\n")
 
         # Run the code and catch errors.
-        p = Popen([sys.executable, temp_path], stdout=PIPE, stderr=PIPE)
+        p = Popen(
+            [sys.executable, temp_path],
+            stdout=PIPE,
+            stderr=PIPE,
+            env={"PYTHONPATH": BASE_DIR},
+        )
         print(sys.executable, temp_path, PIPE)
         out, err = p.communicate()
         decoded_out = out.decode("utf8").replace(temp_path, str(doc_path))
