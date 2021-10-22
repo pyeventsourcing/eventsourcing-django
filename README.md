@@ -84,7 +84,7 @@ class Universe(Application):
 ```
 
 
-## Initialise application
+## Initialize application object
 
 To use the Django ORM as the application's persistence infrastructure,
 you must set the application's environment variable
@@ -116,7 +116,7 @@ arrange for settings to be defined in and used from your Django
 project's `settings.py`.
 
 
-# Views and forms
+## Views and forms
 
 After migrating the database and constructing the application object,
 the application object's methods can be called. The application object's
