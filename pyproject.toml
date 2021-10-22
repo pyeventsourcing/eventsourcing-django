@@ -20,6 +20,7 @@ classifiers = [
 readme = "README.md"
 homepage = "https://eventsourcing.readthedocs.io/"
 repository = "https://github.com/pyeventsourcing/eventsourcing-django"
+include = ["eventsourcing_django/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
