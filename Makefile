@@ -18,7 +18,7 @@ POETRY_INSTALLER_URL ?= https://raw.githubusercontent.com/python-poetry/poetry/m
 
 .PHONY: install-poetry
 install-poetry:
-	curl -sSL $(POETRY_INSTALLER_URL) | python
+	curl -sSL $(POETRY_INSTALLER_URL) | python3
 	$(POETRY) --version
 
 .PHONY: install-packages
