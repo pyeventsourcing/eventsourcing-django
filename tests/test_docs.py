@@ -85,7 +85,7 @@ class TestDocs(DjangoTestCase):
 
         path = BASE_DIR / "README.md"
         if not path.exists():
-            self.fail(f"Skipped test, README file not found: {path}")
+            self.fail(f"README file not found: {path}")
         self.check_code_snippets_in_file(path)
 
     def check_code_snippets_in_file(self, doc_path: Path) -> None:  # noqa: C901
