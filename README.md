@@ -22,7 +22,12 @@ Add `'eventsourcing_django'` to your Django project's `INSTALLED_APPS` setting.
     ]
 
 
-## Applications and aggregates
+Run Django's `manage.py migrate` command.
+
+    $ python manage.py migrate eventsourcing_django
+
+
+## Aggregates and application
 
 You can develop event-sourced aggregates and applications
 independently of persistence infrastructure. Please refer
@@ -79,38 +84,7 @@ class Universe(Application):
 ```
 
 
-## Database migration
-
-Set `DJANGO_SETTINGS_MODULE` and run Django's `manage.py migrate` command.
-
-In this example, we use the [example Django project](https://github.com/pyeventsourcing/eventsourcing-django/tree/main/tests/djangoproject)
-in this package's repository.
-
-```python
-import os
-
-import django
-from django.core.management import call_command
-
-
-# Set DJANGO_SETTINGS_MODULE.
-os.environ.update({
-    "DJANGO_SETTINGS_MODULE": "tests.djangoproject.settings",
-})
-
-# Setup Django.
-django.setup()
-
-# Setup the database.
-call_command('migrate', 'eventsourcing_django')
-```
-
-## Application object
-
-After migrating the database and defining an application, we can
-construct the application object. The application object binds
-the domain model and the persistence infrastructure, and provides
-an interface for views and forms.
+## Initialise application
 
 To use the Django ORM as the application's persistence infrastructure,
 you must set the application's environment variable
@@ -118,6 +92,17 @@ you must set the application's environment variable
 Environment variables can be set in the environment, or set on the
 application class, or passed in when constructing the application
 object as seen below.
+
+```python
+# Construct the application.
+app = Universe(env={
+    "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
+    "COMPRESSOR_TOPIC": "zlib",
+})
+```
+
+The application object brings together the domain model and the
+persistence infrastructure, and provides an interface for views and forms.
 
 You may wish to construct the application object on a signal
 when the Django project is "ready". You can use the `ready()`
@@ -130,13 +115,6 @@ of stored events, set `COMPRESSOR_TOPIC`. You may wish to
 arrange for settings to be defined in and used from your Django
 project's `settings.py`.
 
-```python
-# Construct the application.
-app = Universe(env={
-    "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
-    "COMPRESSOR_TOPIC": "zlib",
-})
-```
 
 # Views and forms
 
@@ -145,7 +123,6 @@ the application object's methods can be called. The application object's
 methods may be called from Django view and form classes.
 
 ```python
-
 # Call application command methods.
 world_id = app.create_world()
 

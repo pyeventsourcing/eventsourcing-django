@@ -2,9 +2,7 @@
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
-from subprocess import PIPE, Popen  # nosec
 from tempfile import NamedTemporaryFile
 from typing import TYPE_CHECKING
 
@@ -186,32 +184,37 @@ class TestDocs(DjangoTestCase):
 
         # Write the code into a temp file.
         tempfile = NamedTemporaryFile("w+")
-        temp_path = tempfile.name
-        tempfile.writelines("\n".join(lines) + "\n")
+        source = "\n".join(lines) + "\n"
+        tempfile.writelines(source)
         tempfile.flush()
 
-        print(Path.cwd())
-        print("\n".join(lines) + "\n")
-
-        # Run the code and catch errors.
-        p = Popen(
-            [sys.executable, temp_path],
-            stdout=PIPE,
-            stderr=PIPE,
-            env={"PYTHONPATH": BASE_DIR},
+        exec(
+            compile(source=source, filename=doc_path, mode="exec"), globals(), globals()
         )
-        print(sys.executable, temp_path, PIPE)
-        out, err = p.communicate()
-        decoded_out = out.decode("utf8").replace(temp_path, str(doc_path))
-        decoded_err = err.decode("utf8").replace(temp_path, str(doc_path))
-        exit_status = p.wait()
+        return
 
-        print(decoded_out)
-        print(decoded_err)
-
-        # Check for errors running the code.
-        if exit_status:
-            self.fail(decoded_out + decoded_err)
-
-        # Close (deletes) the tempfile.
-        tempfile.close()
+        # print(Path.cwd())
+        # print("\n".join(lines) + "\n")
+        #
+        # # Run the code and catch errors.
+        # p = Popen(
+        #     [sys.executable, temp_path],
+        #     stdout=PIPE,
+        #     stderr=PIPE,
+        #     env={"PYTHONPATH": BASE_DIR},
+        # )
+        # print(sys.executable, temp_path, PIPE)
+        # out, err = p.communicate()
+        # decoded_out = out.decode("utf8").replace(temp_path, str(doc_path))
+        # decoded_err = err.decode("utf8").replace(temp_path, str(doc_path))
+        # exit_status = p.wait()
+        #
+        # print(decoded_out)
+        # print(decoded_err)
+        #
+        # # Check for errors running the code.
+        # if exit_status:
+        #     self.fail(decoded_out + decoded_err)
+        #
+        # # Close (deletes) the tempfile.
+        # tempfile.close()
