@@ -1,26 +1,24 @@
-# Event Sourcing in Python with Django
+# Event Sourcing with Django
 
-This package is a Django app that supports using the Python
-[eventsourcing](https://github.com/johnbywater/eventsourcing) library
-with the [Django ORM](https://www.djangoproject.com/).
+This package is a Django app that uses the
+[Django ORM](https://www.djangoproject.com/)
+as persistence infrastructure for the
+[Python eventsourcing library](https://github.com/johnbywater/eventsourcing).
 
-## Installation
 
-Use pip to install the [stable distribution](https://pypi.org/project/eventsourcing_django/)
+## Install package
+
+You can use pip to install the [stable distribution](https://pypi.org/project/eventsourcing_django/)
 from the Python Package Index. Please note, it is recommended to
 install Python packages into a Python virtual environment.
 
     $ pip install eventsourcing_django
 
 
-## Synopsis
+## Event-sourced model and application
 
-To use Django with your Python eventsourcing application, use the topic `eventsourcing_django.factory:Factory` as the `INFRASTRUCTURE_FACTORY`
-environment variable.
-
-First define a domain model and application, in the usual way. You may set the
-`INFRASTRUCTURE_FACTORY` environment variable on the application class, so it
-can always use the Django ORM for storing events.
+You can define an event-sourced domain model and application
+methods independently of persistence infrastructure.
 
 ```python
 from eventsourcing.application import Application
@@ -37,12 +35,8 @@ class World(Aggregate):
 
 
 class Worlds(Application):
-    env = {
-        "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
-        "IS_SNAPSHOTTING_ENABLED": "yes",
-    }
     snapshotting_intervals = {
-        World: 5,
+        World: 5,  # automatic snapshotting
     }
 
     def create_world(self):
@@ -60,7 +54,31 @@ class Worlds(Application):
         return world.history
 ```
 
-Setup Django, in the usual way.
+Please refer to the [core library docs](https://eventsourcing.readthedocs.io/)
+for more information.
+
+
+## Migrate Django database
+
+Include `eventsourcing_django` in the `INSTALLED_APPS` list in
+your Django project's `settings.py` file.
+
+    INSTALLED_APPS = [
+        "django.contrib.admin",
+        "django.contrib.auth",
+        "django.contrib.contenttypes",
+        "django.contrib.sessions",
+        "django.contrib.messages",
+        "django.contrib.staticfiles",
+        "eventsourcing_django",
+    ]
+
+
+Setup Django and run migrations in the usual way, setting
+`DJANGO_SETTINGS_MODULE` and running the `migrate` command.
+
+In this example, we use the [example Django project](https://github.com/pyeventsourcing/eventsourcing-django/tree/main/tests/djangoproject)
+in this package's repository.
 
 ```python
 import os
@@ -81,38 +99,46 @@ django.setup()
 call_command('migrate', 'eventsourcing_django')
 ```
 
-The application's environment can use other environment variables
-supported by the library, for example to enable application-level
-compression and encryption of stored events, set `COMPRESSOR_TOPIC`
-and `CIPHER_KEY`.
+## Construct application object
 
-```python
-from eventsourcing.cipher import AESCipher
+Construct your event sourced application object. You may wish
+to do this within a Django app in your Django project.
 
+You may wish to construct the application object on a signal
+when the project is ready. Use the ready() method of the AppConfig
+class in your Django app's apps.py module.
 
-# Generate a cipher key (keep this safe).
-cipher_key = AESCipher.create_key(num_bytes=32)
+To use the Django ORM as the application's persistence infrastructure,
+set the application's environment variable `INFRASTRUCTURE_FACTORY`
+to `eventsourcing_django.factory:Factory`. Environment variables
+can be set in the environment, or set on the application class, or
+passed in when constructing the application object.
 
-# Set environment variables.
-os.environ.update({
-    "COMPRESSOR_TOPIC": "zlib",
-    "CIPHER_KEY": cipher_key,
-})
-```
+The application can use other environment variables supported by
+the library, for example to enable application-level compression
+of stored events, set `COMPRESSOR_TOPIC`.
 
-Construct and use the application. You may wish to do this
-within your Django project. The application can be created
-on a signal when the project is ready (use the ready() method
-of the AppConfig class in your Django app's apps.py module).
-The application command and query methods may be called
-from Django view and form classes.
+You may also wish to arrange for settings to be defined in
+and used from your Django project's `settings.py`.
 
 ```python
 # Construct the application.
-app = Worlds()
+app = Worlds(env={
+    "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
+    "COMPRESSOR_TOPIC": "zlib",
+})
+```
+
+# Call application methods
+
+The application command and query methods may be called from Django
+view and form classes.
+
+```python
 
 # Call application command methods.
 world_id = app.create_world()
+
 app.make_it_so(world_id, "dinosaurs")
 app.make_it_so(world_id, "trucks")
 app.make_it_so(world_id, "internet")
@@ -123,16 +149,10 @@ history = app.get_world_history(world_id)
 assert history == ["dinosaurs", "trucks", "internet", "covid"]
 ```
 
-We can see the automatic snapshotting is working, by looking
-in the snapshots store.
+# Is it working?
 
-```python
-snapshots = list(app.snapshots.get(world_id))
-assert len(snapshots) == 1
-```
-
-We can see the application is using the Django infrastructure,
-and that compression and encryption are enabled, by checking the
+We can see the application is using the Django ORM infrastructure,
+and that snapshotting and compression are enabled, by checking the
 attributes of the application object.
 
 ```python
@@ -148,8 +168,15 @@ assert isinstance(app.events.recorder, DjangoApplicationRecorder)
 assert isinstance(app.snapshots.recorder, DjangoAggregateRecorder)
 assert issubclass(app.events.recorder.model, StoredEventRecord)
 assert issubclass(app.snapshots.recorder.model, SnapshotRecord)
-assert isinstance(app.mapper.cipher, AESCipher)
 assert app.mapper.compressor == zlib
+```
+
+We can see the automatic snapshotting is working, by looking
+in the snapshots store.
+
+```python
+snapshots = list(app.snapshots.get(world_id))
+assert len(snapshots) == 1
 ```
 
 For more information, please refer to the Python

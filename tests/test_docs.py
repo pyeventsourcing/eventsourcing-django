@@ -71,7 +71,6 @@ class TestDocs(DjangoTestCase):
     def clean_env(self) -> None:
         keys = [
             "INFRASTRUCTURE_FACTORY",
-            "CIPHER_KEY",
             "COMPRESSOR_TOPIC",
         ]
         for key in keys:

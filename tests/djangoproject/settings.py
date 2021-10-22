@@ -39,13 +39,13 @@ ALLOWED_HOSTS: List[str] = []
 # Application definition
 
 INSTALLED_APPS = [
-    "eventsourcing_django.apps.EventsourcingConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "eventsourcing_django",
 ]
 
 MIDDLEWARE = [

@@ -26,7 +26,7 @@ include = ["eventsourcing_django/py.typed"]
 python = "^3.8"
 
 Django = "^3.0.0"
-eventsourcing = { version = "^9.1.0", extras = ["crypto"] }
+eventsourcing = { version = "^9.1.0"}
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
