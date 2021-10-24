@@ -1,9 +1,11 @@
 # Event Sourcing with Django
 
-This package is a Django app that uses the
-[Django ORM](https://www.djangoproject.com/)
+A Django app that uses the [Django ORM](https://www.djangoproject.com/)
 as persistence infrastructure for the
 [Python eventsourcing library](https://github.com/johnbywater/eventsourcing).
+
+This package is designed and tested to work with Django versions 3.0, 3.1, and 3.2
+and Python versions 3.7, 3.8, 3.9, and 3.10.
 
 
 ## Installation
