@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "eventsourcing_django",
+    "eventsourcing_django.apps.EventsourcingConfig",
 ]
 
 MIDDLEWARE = [

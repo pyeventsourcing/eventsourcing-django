@@ -14,7 +14,18 @@ packages into a Python virtual environment.
     $ pip install eventsourcing_django
 
 
-Add `'eventsourcing_django'` to your Django project's `INSTALLED_APPS` setting.
+If you are using Django 3.0 or 3.1, please add
+`'eventsourcing_django.apps.EventsourcingConfig'` to your Django
+project's `INSTALLED_APPS` setting.
+
+    INSTALLED_APPS = [
+        ...
+        'eventsourcing_django.apps.EventsourcingConfig',
+    ]
+
+
+If you are using Django 3.2 or later, you only need to add `'eventsourcing_django'`
+to your Django project's `INSTALLED_APPS` setting, but the above will work also.
 
     INSTALLED_APPS = [
         ...
@@ -22,7 +33,7 @@ Add `'eventsourcing_django'` to your Django project's `INSTALLED_APPS` setting.
     ]
 
 
-Run Django's `manage.py migrate` command.
+To migrate your database, please run Django's `manage.py migrate` command.
 
     $ python manage.py migrate eventsourcing_django
 
@@ -86,6 +97,10 @@ class Universe(Application):
 
 ## Initialize application object
 
+The application object brings together the domain model and the
+persistence infrastructure, and provides an interface for views
+and forms.
+
 To use the Django ORM as the application's persistence infrastructure,
 you must set the application's environment variable
 `INFRASTRUCTURE_FACTORY` to `eventsourcing_django.factory:Factory`.
@@ -97,23 +112,13 @@ object as seen below.
 # Construct the application.
 app = Universe(env={
     "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
-    "COMPRESSOR_TOPIC": "zlib",
 })
 ```
-
-The application object brings together the domain model and the
-persistence infrastructure, and provides an interface for views and forms.
 
 You may wish to construct the application object on a signal
 when the Django project is "ready". You can use the `ready()`
 method of the `AppConfig` class in the `apps.py` module of a
 Django app.
-
-The application can use other environment variables supported by
-the library, for example to enable application-level compression
-of stored events, set `COMPRESSOR_TOPIC`. You may wish to
-arrange for settings to be defined in and used from your Django
-project's `settings.py`.
 
 
 ## Views and forms
