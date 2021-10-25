@@ -1,20 +1,35 @@
 # Event Sourcing with Django
 
-A Django app that uses the [Django ORM](https://www.djangoproject.com/)
-as persistence infrastructure for the
-[Python eventsourcing library](https://github.com/johnbywater/eventsourcing).
+The Python package `eventsourcing-django` provides a Django app
+that uses the [Django ORM](https://www.djangoproject.com/)
+to define alternative persistence infrastructure for the
+[Python eventsourcing library](https://github.com/pyeventsourcing/eventsourcing).
 
-This package is designed and tested to work with Django versions 3.0, 3.1, and 3.2
-and Python versions 3.7, 3.8, 3.9, and 3.10.
+This package is [available on PyPI](https://pypi.org/project/eventsourcing-django/).
+
+This package is designed and tested to work with version 9.1 of
+the Python eventsourcing library, Django versions 3.0, 3.1, and
+3.2, and Python versions 3.7, 3.8, 3.9, and 3.10.
+
+This functionality provided by this package was previously included
+in the Python eventsourcing package, but was moved out to a separate
+package during development of version 9.
+
+This is package is maintained by the Python eventsourcing project.
+Please [raise issues on GitHub](https://github.com/pyeventsourcing/eventsourcing-django/issues)
+and [join the community](https://join.slack.com/t/eventsourcinginpython/shared_invite/enQtMjczNTc2MzcxNDI0LTJjMmJjYTc3ODQ3M2YwOTMwMDJlODJkMjk3ZmE1MGYyZDM4MjIxODZmYmVkZmJkODRhZDg5N2MwZjk1YzU3NmY)
+discussion on Slack.
 
 
 ## Installation
 
-Install using `pip`. It is recommended to install Python
-packages into a Python virtual environment.
+You can use `pip` to install the package. It is recommended to install
+Python packages into a Python virtual environment.
 
-    $ pip install eventsourcing_django
+    $ pip install eventsourcing-django
 
+
+## Configuration
 
 If you are using Django 3.0 or 3.1, please add
 `'eventsourcing_django.apps.EventsourcingConfig'` to your Django
@@ -35,12 +50,14 @@ to your Django project's `INSTALLED_APPS` setting, although the above will work 
     ]
 
 
+## Database migration
+
 To migrate your database, please run Django's `manage.py migrate` command.
 
     $ python manage.py migrate eventsourcing_django
 
 
-## Aggregates and application
+## Event-sourced aggregates and application
 
 You can develop event-sourced aggregates and applications
 independently of persistence infrastructure. Please refer
@@ -120,7 +137,7 @@ Django app.
 
 After migrating the database and constructing the application object,
 the application object's methods can be called. The application object's
-methods may be called from Django view and form classes.
+methods may be called from Django views and forms.
 
 ```python
 # Call application command methods.
