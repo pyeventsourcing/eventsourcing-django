@@ -14,7 +14,7 @@ The functionality provided by this package was previously included
 in the Python eventsourcing package, but was moved out to a separate
 package during development of version 9.
 
-This is package is maintained by the Python eventsourcing project.
+This package is maintained by the Python eventsourcing project.
 Please [raise issues on GitHub](https://github.com/pyeventsourcing/eventsourcing-django/issues)
 and [join the community](https://join.slack.com/t/eventsourcinginpython/shared_invite/enQtMjczNTc2MzcxNDI0LTJjMmJjYTc3ODQ3M2YwOTMwMDJlODJkMjk3ZmE1MGYyZDM4MjIxODZmYmVkZmJkODRhZDg5N2MwZjk1YzU3NmY)
 discussion on Slack.
