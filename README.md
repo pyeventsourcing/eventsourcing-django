@@ -4,14 +4,13 @@ The Python package `eventsourcing-django` provides a Django app
 that uses the [Django ORM](https://www.djangoproject.com/)
 to define alternative persistence infrastructure for the
 [Python eventsourcing library](https://github.com/pyeventsourcing/eventsourcing).
-
 This package is [available on PyPI](https://pypi.org/project/eventsourcing-django/).
 
 This package is designed and tested to work with version 9.1 of
 the Python eventsourcing library, Django versions 3.0, 3.1, and
 3.2, and Python versions 3.7, 3.8, 3.9, and 3.10.
 
-This functionality provided by this package was previously included
+The functionality provided by this package was previously included
 in the Python eventsourcing package, but was moved out to a separate
 package during development of version 9.
 
