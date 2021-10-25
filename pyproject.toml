@@ -28,9 +28,8 @@ include = ["eventsourcing_django/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-
-Django = "^3.0.0"
 eventsourcing = { version = "^9.1.0"}
+Django = ">=2.2.24"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
@@ -45,7 +44,7 @@ isort = "*"
 mypy = "*"
 pre-commit = "*"
 pre-commit-hooks = "*"
-psycopg2-binary = "*"
+psycopg2-binary = "2.8.6"  # 2.9.1 Doesn't work with Django <= 3.0
 pycryptodome = "~3.10.0"
 pytest = "*"
 pytest-cov = "*"

@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING
 
-from django.db import connection
+import django
 from django.test import TransactionTestCase
 from eventsourcing.tests.aggregaterecorder_testcase import AggregateRecorderTestCase
 from eventsourcing.tests.applicationrecorder_testcase import ApplicationRecorderTestCase
@@ -22,9 +22,45 @@ from eventsourcing_django.recorders import (
 if TYPE_CHECKING:
     from typing import Any, Optional
 
+from django.db import connection
+from django.db.backends.sqlite3.operations import DatabaseOperations
+
+
+def _monkey_patch_sqlite_sql_flush_with_sequence_reset():  # type: ignore
+    original_sql_flush = DatabaseOperations.sql_flush
+
+    def sql_flush_with_sequence_reset(  # type: ignore
+        self, style, tables, sequences, allow_cascade=False
+    ):
+        sql_statement_list = original_sql_flush(
+            self, style, tables, sequences, allow_cascade
+        )
+        if tables:
+            # DELETE FROM sqlite_sequence WHERE name IN ($tables)
+            sql = "%s %s %s %s %s %s (%s);" % (
+                style.SQL_KEYWORD("DELETE"),
+                style.SQL_KEYWORD("FROM"),
+                style.SQL_TABLE(self.quote_name("sqlite_sequence")),
+                style.SQL_KEYWORD("WHERE"),
+                style.SQL_FIELD(self.quote_name("name")),
+                style.SQL_KEYWORD("IN"),
+                ", ".join(style.SQL_FIELD(f"'{table}'") for table in tables),
+            )
+            sql_statement_list.append(sql)
+        return sql_statement_list
+
+    DatabaseOperations.sql_flush = sql_flush_with_sequence_reset
+
 
 class DjangoTestCase(TransactionTestCase):
     reset_sequences = True
+
+    @classmethod
+    def setUpClass(cls):  # type: ignore
+        super().setUpClass()
+        if django.VERSION[0:2] <= (3, 0):
+            if connection.vendor == "sqlite":
+                _monkey_patch_sqlite_sql_flush_with_sequence_reset()
 
     def tearDown(self) -> None:
         journal_modes.clear()
