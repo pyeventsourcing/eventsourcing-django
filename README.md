@@ -33,7 +33,7 @@ Python packages into a Python virtual environment.
 
 ## Configuration
 
-If you are using Django 3.0 or 3.1, please add
+If you are using Django 2.2, 3.0 or 3.1, please add
 `'eventsourcing_django.apps.EventsourcingConfig'` to your Django
 project's `INSTALLED_APPS` setting.
 
