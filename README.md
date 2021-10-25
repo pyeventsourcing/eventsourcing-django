@@ -7,8 +7,11 @@ to define alternative persistence infrastructure for the
 This package is [available on PyPI](https://pypi.org/project/eventsourcing-django/).
 
 This package is designed and tested to work with version 9.1 of
-the Python eventsourcing library, Django versions 3.0, 3.1, and
-3.2, and Python versions 3.7, 3.8, 3.9, and 3.10.
+the Python eventsourcing library, Django versions 3.0, 3.1,
+3.2, and 4.0, and Python versions 3.7, 3.8, 3.9, and 3.10.
+Please note, all version combinations are tested on Ubuntu
+20.04 LTS “Focal Fossa”, except for Django 4.0 with Python 3.7
+because Django 4.0 does not support Python 3.7.
 
 The functionality provided by this package was previously included
 in the Python eventsourcing package, but was moved out to a separate
