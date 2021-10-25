@@ -29,7 +29,7 @@ include = ["eventsourcing_django/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.7"
 eventsourcing = { version = "^9.1.0"}
-Django = ">=2.2.24"
+Django = ">=2.2.24,<5.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
