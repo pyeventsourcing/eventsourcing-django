@@ -27,7 +27,7 @@ project's `INSTALLED_APPS` setting.
 
 
 If you are using Django 3.2 or later, you only need to add `'eventsourcing_django'`
-to your Django project's `INSTALLED_APPS` setting, but the above will work also.
+to your Django project's `INSTALLED_APPS` setting, although the above will work also.
 
     INSTALLED_APPS = [
         ...
@@ -70,17 +70,10 @@ creates a new `World` aggregate. The method `make_it_so()` calls `make_it_so()`
 on an existing `World` aggregate. The method `get_world_history()`
 returns the current `history` value of an existing `World` aggregate.
 
-Automatic snapshotting is enabled by using the `snapshotting_intervals`
-attribute of the application class.
-
 ```python
 from eventsourcing.application import Application
 
 class Universe(Application):
-    snapshotting_intervals = {
-        World: 5,  # automatic snapshotting
-    }
-
     def create_world(self):
         world = World()
         self.save(world)
@@ -141,34 +134,6 @@ app.make_it_so(world_id, "covid")
 # Call application query methods.
 history = app.get_world_history(world_id)
 assert history == ["dinosaurs", "trucks", "internet", "covid"]
-```
-
-We can see the application is using the Django ORM infrastructure,
-and that snapshotting and compression are enabled, by checking the
-attributes of the application object.
-
-```python
-from eventsourcing_django.factory import Factory
-from eventsourcing_django.recorders import DjangoAggregateRecorder
-from eventsourcing_django.recorders import DjangoApplicationRecorder
-from eventsourcing_django.models import StoredEventRecord
-from eventsourcing_django.models import SnapshotRecord
-import zlib
-
-assert isinstance(app.factory, Factory)
-assert isinstance(app.events.recorder, DjangoApplicationRecorder)
-assert isinstance(app.snapshots.recorder, DjangoAggregateRecorder)
-assert issubclass(app.events.recorder.model, StoredEventRecord)
-assert issubclass(app.snapshots.recorder.model, SnapshotRecord)
-assert app.mapper.compressor == zlib
-```
-
-We can see automatic snapshotting is working, by looking
-in the snapshots store.
-
-```python
-snapshots = list(app.snapshots.get(world_id))
-assert len(snapshots) == 1
 ```
 
 For more information, please refer to the Python
