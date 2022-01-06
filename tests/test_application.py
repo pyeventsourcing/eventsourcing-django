@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from eventsourcing.tests.test_application_with_popo import (
+from eventsourcing.tests.application_tests.test_application_with_popo import (
     TIMEIT_FACTOR,
     TestApplicationWithPOPO,
 )

@@ -4,7 +4,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from functools import wraps
 from threading import Lock
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Sequence
 from uuid import UUID
 
 import django.db
@@ -123,11 +123,14 @@ class DjangoAggregateRecorder(AggregateRecorder):
                 self.lock.release()
 
     @errors
-    def insert_events(self, stored_events: List[StoredEvent], **kwargs: Any) -> None:
+    def insert_events(
+        self, stored_events: List[StoredEvent], **kwargs: Any
+    ) -> Optional[Sequence[int]]:
         with self.serialize():
             with transaction.atomic(using=self.using):
                 self._lock_table()
                 self._insert_events(stored_events, **kwargs)
+        return None
 
     def _lock_table(self) -> None:
         connection = get_connection(using=self.using)
@@ -136,7 +139,9 @@ class DjangoAggregateRecorder(AggregateRecorder):
             db_table = self.model._meta.db_table
             cursor.execute(f"LOCK TABLE {db_table} IN EXCLUSIVE MODE")
 
-    def _insert_events(self, stored_events: List[StoredEvent], **kwargs: Any) -> None:
+    def _insert_events(
+        self, stored_events: List[StoredEvent], **kwargs: Any
+    ) -> Sequence[int]:
         records = []
         for stored_event in stored_events:
             record = self.model(
@@ -147,8 +152,12 @@ class DjangoAggregateRecorder(AggregateRecorder):
                 state=stored_event.state,
             )
             records.append(record)
+        notification_ids = []
         for record in records:
             record.save(using=self.using)
+            if hasattr(record, "id"):
+                notification_ids.append(record.id)
+        return notification_ids
 
     @errors
     def select_events(
@@ -184,13 +193,32 @@ class DjangoAggregateRecorder(AggregateRecorder):
 
 class DjangoApplicationRecorder(DjangoAggregateRecorder, ApplicationRecorder):
     @errors
-    def select_notifications(self, start: int, limit: int) -> List[Notification]:
+    def insert_events(
+        self, stored_events: List[StoredEvent], **kwargs: Any
+    ) -> Optional[Sequence[int]]:
+        with self.serialize():
+            with transaction.atomic(using=self.using):
+                self._lock_table()
+                return self._insert_events(stored_events, **kwargs)
+
+    @errors
+    def select_notifications(
+        self,
+        start: int,
+        limit: int,
+        stop: Optional[int] = None,
+        topics: Sequence[str] = (),
+    ) -> List[Notification]:
         with self.serialize():
             q = self.model.objects.using(alias=self.using).filter(
                 application_name=self.application_name,
             )
             q = q.order_by("id")
             q = q.filter(id__gte=start)
+            if stop is not None:
+                q = q.filter(id__lte=stop)
+            if topics:
+                q = q.filter(topic__in=topics)
             q = q[0:limit]
             records = list(q)
         return [
@@ -219,8 +247,12 @@ class DjangoApplicationRecorder(DjangoAggregateRecorder, ApplicationRecorder):
 
 
 class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
-    def _insert_events(self, stored_events: List[StoredEvent], **kwargs: Any) -> None:
-        super(DjangoProcessRecorder, self)._insert_events(stored_events, **kwargs)
+    def _insert_events(
+        self, stored_events: List[StoredEvent], **kwargs: Any
+    ) -> Sequence[int]:
+        notification_ids = super(DjangoProcessRecorder, self)._insert_events(
+            stored_events, **kwargs
+        )
         tracking: Optional[Tracking] = kwargs.get("tracking", None)
         if tracking is not None:
             record = NotificationTrackingRecord(
@@ -229,6 +261,7 @@ class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
                 notification_id=tracking.notification_id,
             )
             record.save(using=self.using)
+        return notification_ids
 
     @errors
     def max_tracking_id(self, application_name: str) -> int:

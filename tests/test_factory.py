@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
 from typing import Type
 
 from eventsourcing.persistence import InfrastructureFactory
-from eventsourcing.tests.infrastructure_testcases import InfrastructureFactoryTestCase
-from eventsourcing.utils import get_topic
+from eventsourcing.tests.persistence_tests.base_infrastructure_tests import (
+    InfrastructureFactoryTestCase,
+)
+from eventsourcing.utils import Environment
 
 from eventsourcing_django.factory import Factory
 from eventsourcing_django.recorders import (
@@ -18,6 +19,11 @@ from tests.test_recorders import DjangoTestCase
 
 
 class TestFactory(DjangoTestCase, InfrastructureFactoryTestCase):
+    def setUp(self) -> None:
+        self.env = Environment("TestCase")
+        self.env[InfrastructureFactory.PERSISTENCE_MODULE] = Factory.__module__
+        super().setUp()
+
     def expected_factory_class(self) -> Type[Factory]:
         return Factory
 
@@ -29,10 +35,6 @@ class TestFactory(DjangoTestCase, InfrastructureFactoryTestCase):
 
     def expected_process_recorder_class(self) -> Type[DjangoProcessRecorder]:
         return DjangoProcessRecorder
-
-    def setUp(self) -> None:
-        os.environ[InfrastructureFactory.TOPIC] = get_topic(Factory)
-        super().setUp()
 
 
 del InfrastructureFactoryTestCase

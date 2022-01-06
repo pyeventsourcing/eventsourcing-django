@@ -31,8 +31,14 @@ ifeq ($(opts),)
 	$(POETRY) run pre-commit install
 endif
 
+.PHONY: uninstall-pre-commit-hooks
+uninstall-pre-commit-hooks:
+ifeq ($(opts),)
+	$(POETRY) run pre-commit uninstall
+endif
+
 .PHONY: install
-install: install-poetry install-packages install-pre-commit-hooks
+install: install-poetry install-packages
 
 .PHONY: lock-packages
 lock-packages:
@@ -88,7 +94,7 @@ lint-mypy:
 	$(POETRY) run mypy
 
 .PHONY: lint-python
-lint-python: lint-bandit lint-black lint-flake8 lint-isort lint-mypy
+lint-python: lint-black lint-flake8 lint-isort lint-mypy
 
 .PHONY: lint
 lint: lint-python

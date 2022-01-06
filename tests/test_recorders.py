@@ -6,10 +6,12 @@ from typing import TYPE_CHECKING
 
 import django
 from django.test import TransactionTestCase
-from eventsourcing.tests.aggregaterecorder_testcase import AggregateRecorderTestCase
-from eventsourcing.tests.applicationrecorder_testcase import ApplicationRecorderTestCase
-from eventsourcing.tests.processrecorder_testcase import ProcessRecorderTestCase
-from eventsourcing.tests.test_postgres import pg_close_all_connections
+from eventsourcing.base_test_cases import (
+    AggregateRecorderTestCase,
+    ApplicationRecorderTestCase,
+    ProcessRecorderTestCase,
+)
+from eventsourcing.tests.persistence_tests.test_postgres import pg_close_all_connections
 
 from eventsourcing_django.models import SnapshotRecord, StoredEventRecord
 from eventsourcing_django.recorders import (
