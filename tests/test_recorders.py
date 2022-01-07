@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 from typing import TYPE_CHECKING
+from unittest import skip
 
 import django
 from django.test import TransactionTestCase
@@ -93,14 +94,14 @@ class TestDjangoApplicationRecorder(DjangoTestCase, ApplicationRecorderTestCase)
             application_name="app", model=StoredEventRecord, using=self.db_alias
         )
 
-    def test_insert_select(self) -> None:
-        super(TestDjangoApplicationRecorder, self).test_insert_select()
-
-    def test_concurrent_no_conflicts(self) -> None:
-        super().test_concurrent_no_conflicts()
-
     def close_db_connection(self, *args: Any) -> None:
         connection.close()
+
+
+class TestDjangoApplicationRecorderWithSQLiteInMemory(TestDjangoApplicationRecorder):
+    @skip(reason="Get 'Database is locked' error with GitHub Actions")
+    def test_concurrent_no_conflicts(self) -> None:
+        super().test_concurrent_no_conflicts()
 
 
 class TestDjangoApplicationRecorderWithSQLiteFileDb(TestDjangoApplicationRecorder):
@@ -129,13 +130,8 @@ class TestDjangoProcessRecorder(DjangoTestCase, ProcessRecorderTestCase):
     def create_recorder(self) -> DjangoProcessRecorder:
         return DjangoProcessRecorder(application_name="app", model=StoredEventRecord)
 
-    def test_insert_select(self) -> None:
-        super(TestDjangoProcessRecorder, self).test_insert_select()
-
-    def test_performance(self) -> None:
-        super().test_performance()
-
 
 del AggregateRecorderTestCase
 del ApplicationRecorderTestCase
 del ProcessRecorderTestCase
+del TestDjangoApplicationRecorder
