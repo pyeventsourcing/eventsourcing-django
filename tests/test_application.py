@@ -16,11 +16,11 @@ class TestApplicationWithDjango(DjangoTestCase, TestApplicationWithPOPO):
 
     def setUp(self) -> None:
         super().setUp()
-        os.environ["INFRASTRUCTURE_FACTORY"] = "eventsourcing_django.factory:Factory"
+        os.environ["PERSISTENCE_MODULE"] = "eventsourcing_django"
         os.environ["DJANGO_DB_ALIAS"] = self.django_db_alias
 
     def tearDown(self) -> None:
-        del os.environ["INFRASTRUCTURE_FACTORY"]
+        del os.environ["PERSISTENCE_MODULE"]
         del os.environ["DJANGO_DB_ALIAS"]
         super().tearDown()
 

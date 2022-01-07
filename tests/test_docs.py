@@ -4,59 +4,10 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import TYPE_CHECKING
 
 from tests.test_recorders import DjangoTestCase
 
-if TYPE_CHECKING:
-    from typing import List
-    from uuid import UUID
-
-
 BASE_DIR = Path(__file__).parents[1]
-
-
-class TestExample(DjangoTestCase):
-    def test(self) -> None:
-        from eventsourcing.domain import Aggregate, event
-
-        class World(Aggregate):
-            def __init__(self) -> None:
-                self.history: List[str] = []
-
-            @event("SomethingHappened")
-            def make_it_so(self, what: str) -> None:
-                self.history.append(what)
-
-        from eventsourcing.application import Application
-
-        class Worlds(Application[World]):
-            def create_world(self) -> UUID:
-                world = World()
-                self.save(world)
-                return world.id
-
-            def make_it_so(self, world_id: UUID, what: str) -> None:
-                world = self.repository.get(world_id)
-                world.make_it_so(what)
-                self.save(world)
-
-            def get_world_history(self, world_id: UUID) -> List[str]:
-                world = self.repository.get(world_id)
-                return world.history
-
-        app = Worlds(
-            env={
-                "INFRASTRUCTURE_FACTORY": "eventsourcing_django.factory:Factory",
-            }
-        )
-        world_id = app.create_world()
-        app.make_it_so(world_id, "dinosaurs")
-        app.make_it_so(world_id, "trucks")
-        app.make_it_so(world_id, "internet")
-
-        history = app.get_world_history(world_id)
-        assert history == ["dinosaurs", "trucks", "internet"]  # nosec
 
 
 class TestDocs(DjangoTestCase):
@@ -68,7 +19,7 @@ class TestDocs(DjangoTestCase):
 
     def clean_env(self) -> None:
         keys = [
-            "INFRASTRUCTURE_FACTORY",
+            "PERSISTENCE_MODULE",
             "COMPRESSOR_TOPIC",
         ]
         for key in keys:
