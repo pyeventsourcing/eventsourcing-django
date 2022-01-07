@@ -22,7 +22,7 @@ install Python packages into a Python virtual environment.
     $ pip install eventsourcing_django
 
 
-## Configuration
+## Django
 
 If you are using Django 2.2, 3.0 or 3.1, please add
 `'eventsourcing_django.apps.EventsourcingConfig'` to your Django
@@ -42,14 +42,12 @@ to your Django project's `INSTALLED_APPS` setting, although the above will work 
         'eventsourcing_django',
     ]
 
-## Database migration
-
 To migrate your database, please run Django's `manage.py migrate` command.
 
     $ python manage.py migrate eventsourcing_django
 
 
-## Event-sourced aggregates and application
+## Event sourcing
 
 Define aggregates and applications in the usual way.
 
@@ -89,15 +87,6 @@ class Dog(Aggregate):
         self.tricks.append(trick)
 ```
 
-
-
-When using this module, you need to set the environment variable `SQLALCHEMY_URL` to an
-SQLAlchemy database URL for your database.
-Please refer to the [SQLAlchemy documentation](https://docs.sqlalchemy.org/en/14/core/engines.html)
-for more information about SQLAlchemy Database URLs.
-
-## Initialize application object
-
 To use this module as the persistence module for your event-sourced application, set
 the environment variable `PERSISTENCE_MODULE` to `'eventsourcing_django'`.
 
@@ -111,9 +100,6 @@ You may wish to construct the application object on a signal
 when the Django project is "ready". You can use the `ready()`
 method of the `AppConfig` class in the `apps.py` module of a
 Django app.
-
-
-## Django views and forms
 
 The application's methods may be called from Django views and forms.
 
