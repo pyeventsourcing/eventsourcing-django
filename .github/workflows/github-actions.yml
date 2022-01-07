@@ -12,11 +12,11 @@ jobs:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
         poetry-version: ["1.1.11"]
-        django-version: ["2.2.24", "3.0.14", "3.1.13", "3.2.8", "4.0a1"]
+        django-version: ["3.0.14", "3.1.13", "3.2.8", "4.0"]
         os: [ ubuntu-20.04 ]
         exclude:
           - python-version: "3.7"
-            django-version: "4.0a1"
+            django-version: "4.0"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -71,11 +71,11 @@ jobs:
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
         poetry-version: ["1.1.11"]
-        django-version: ["2.2.24", "3.0.14", "3.1.13", "3.2.8", "4.0a1"]
+        django-version: ["3.0.14", "3.1.13", "3.2.8", "4.0"]
         os: [ubuntu-20.04]
         exclude:
           - python-version: "3.7"
-            django-version: "4.0a1"
+            django-version: "4.0"
     runs-on: ${{ matrix.os }}
     services:
       postgres:

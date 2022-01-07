@@ -86,20 +86,19 @@ class Dog(Aggregate):
     def add_trick(self, trick):
         self.tricks.append(trick)
 ```
-
-To use this module as the persistence module for your event-sourced application, set
-the environment variable `PERSISTENCE_MODULE` to `'eventsourcing_django'`.
+Construct and use the application in the usual way.
+Set `PERSISTENCE_MODULE` to `'eventsourcing_django'`
+in the application's environment.
+You may wish to construct the application object on a signal
+when the Django project is "ready". You can use the `ready()`
+method of the `AppConfig` class in the `apps.py` module of a
+Django app.
 
 ```python
 school = TrainingSchool(env={
     "PERSISTENCE_MODULE": "eventsourcing_django",
 })
 ```
-
-You may wish to construct the application object on a signal
-when the Django project is "ready". You can use the `ready()`
-method of the `AppConfig` class in the `apps.py` module of a
-Django app.
 
 The application's methods may be called from Django views and forms.
 
