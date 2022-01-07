@@ -6,8 +6,8 @@ class EventsourcingConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "eventsourcing_django"
 
-    def ready(self):
+    def ready(self) -> None:
         import eventsourcing_django
-        import eventsourcing_django.factory
+        from eventsourcing_django.factory import Factory
 
-        eventsourcing_django.Factory = eventsourcing_django.factory.Factory
+        eventsourcing_django.Factory = Factory  # type: ignore
