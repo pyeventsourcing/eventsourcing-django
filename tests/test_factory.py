@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Type
 
 from eventsourcing.persistence import InfrastructureFactory
-from eventsourcing.tests.persistence_tests.base_infrastructure_tests import (
+from eventsourcing.tests.infrastructure_factory import (
     InfrastructureFactoryTestCase,
 )
 from eventsourcing.utils import Environment

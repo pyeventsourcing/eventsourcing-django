@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
 
-from eventsourcing.tests.application_tests.test_application_with_popo import (
+from eventsourcing.tests.example_application import (
     TIMEIT_FACTOR,
-    TestApplicationWithPOPO,
+    ExampleApplicationTestCase,
 )
 
 from tests.test_recorders import DjangoTestCase
 
 
-class TestApplicationWithDjango(DjangoTestCase, TestApplicationWithPOPO):
+class TestApplicationWithDjango(DjangoTestCase, ExampleApplicationTestCase):
     timeit_number = 30 * TIMEIT_FACTOR
     expected_factory_topic = "eventsourcing_django.factory:Factory"
     django_db_alias = ""
@@ -36,4 +36,4 @@ class TestWithPostgres(TestApplicationWithDjango):
     databases = {"default", "postgres"}
 
 
-del TestApplicationWithPOPO
+del ExampleApplicationTestCase
