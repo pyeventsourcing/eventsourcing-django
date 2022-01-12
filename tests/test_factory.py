@@ -4,9 +4,7 @@ from __future__ import annotations
 from typing import Type
 
 from eventsourcing.persistence import InfrastructureFactory
-from eventsourcing.tests.infrastructure_factory import (
-    InfrastructureFactoryTestCase,
-)
+from eventsourcing.tests.infrastructure_factory import InfrastructureFactoryTestCase
 from eventsourcing.utils import Environment
 
 from eventsourcing_django.factory import Factory

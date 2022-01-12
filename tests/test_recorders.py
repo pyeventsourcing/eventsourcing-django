@@ -7,12 +7,12 @@ from unittest import skip
 
 import django
 from django.test import TransactionTestCase
+from eventsourcing.tests.postgres_utils import pg_close_all_connections
 from eventsourcing.tests.recorders import (
     AggregateRecorderTestCase,
     ApplicationRecorderTestCase,
     ProcessRecorderTestCase,
 )
-from eventsourcing.tests.postgres_utils import pg_close_all_connections
 
 from eventsourcing_django.models import SnapshotRecord, StoredEventRecord
 from eventsourcing_django.recorders import (

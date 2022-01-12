@@ -4,10 +4,8 @@ from __future__ import annotations
 import os
 from typing import Optional
 
-from eventsourcing.tests.recorders import (
-    NonInterleavingNotificationIDsBaseCase,
-)
 from eventsourcing.tests.postgres_utils import pg_close_all_connections
+from eventsourcing.tests.recorders import NonInterleavingNotificationIDsBaseCase
 
 from eventsourcing_django.models import StoredEventRecord
 from eventsourcing_django.recorders import DjangoApplicationRecorder
