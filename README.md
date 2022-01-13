@@ -4,7 +4,7 @@ This package supports using the Python
 [eventsourcing](https://github.com/pyeventsourcing/eventsourcing) library
 with [Django ORM](https://www.djangoproject.com/).
 
-To use SQLAlchemy with your Python eventsourcing applications:
+To use Django with your Python eventsourcing applications:
 * install the Python package `eventsourcing_django`
 * add `'eventsourcing_django'` to your Django project's `INSTALLED_APPS` setting
 * migrate your database for this Django app
