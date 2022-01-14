@@ -144,12 +144,11 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "eventsourcing"
-version = "9.2.0.dev0"
+version = "9.2.0rc2"
 description = "Event sourcing in Python"
 category = "main"
 optional = false
-python-versions = "*"
-develop = false
+python-versions = ">=3.7"
 
 [package.dependencies]
 pycryptodome = {version = "<=3.12.99999", optional = true, markers = "extra == \"crypto\""}
@@ -160,12 +159,6 @@ dev = ["psycopg2-binary (<=2.9.99999)", "pycryptodome (<=3.12.99999)", "Sphinx (
 docs = ["psycopg2-binary (<=2.9.99999)", "pycryptodome (<=3.12.99999)", "Sphinx (==4.2.0)", "sphinx-rtd-theme (==1.0.0)"]
 postgres = ["psycopg2 (<=2.9.99999)"]
 postgres_dev = ["psycopg2-binary (<=2.9.99999)"]
-
-[package.source]
-type = "git"
-url = "https://github.com/pyeventsourcing/eventsourcing.git"
-reference = "main"
-resolved_reference = "df434af87fcf7ffc261b391a8d3dae900f7ddcb5"
 
 [[package]]
 name = "filelock"
@@ -283,7 +276,7 @@ typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.8\""
 
 [[package]]
 name = "identify"
-version = "2.4.3"
+version = "2.4.4"
 description = "File identification library for Python"
 category = "dev"
 optional = false
@@ -712,7 +705,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "5f587db7a5d82d9df9f77f6288b96eb5022223a85b85af6048e11489131a4541"
+content-hash = "ae3bd290097382ab685936b1314bee97b001c4f26495bc4e730bccd73d734fb9"
 
 [metadata.files]
 asgiref = [
@@ -804,7 +797,10 @@ django = [
     {file = "Django-3.2.11-py3-none-any.whl", hash = "sha256:0a0a37f0b93aef30c4bf3a839c187e1175bcdeb7e177341da0cb7b8194416891"},
     {file = "Django-3.2.11.tar.gz", hash = "sha256:69c94abe5d6b1b088bf475e09b7b74403f943e34da107e798465d2045da27e75"},
 ]
-eventsourcing = []
+eventsourcing = [
+    {file = "eventsourcing-9.2.0rc2-py3-none-any.whl", hash = "sha256:5ad17c7b5d07bfaaeb9447ab28883e9857486131fd2141d662f6fc510197f37e"},
+    {file = "eventsourcing-9.2.0rc2.tar.gz", hash = "sha256:b5abbc055002cd47c38eb27141134d4dc725e71eebef0c06fef0fe0c7df584ce"},
+]
 filelock = [
     {file = "filelock-3.4.2-py3-none-any.whl", hash = "sha256:cf0fc6a2f8d26bd900f19bf33915ca70ba4dd8c56903eeb14e1e7a2fd7590146"},
     {file = "filelock-3.4.2.tar.gz", hash = "sha256:38b4f4c989f9d06d44524df1b24bd19e167d851f19b50bf3e3559952dddc5b80"},
@@ -842,8 +838,8 @@ gitpython = [
     {file = "GitPython-3.1.26.tar.gz", hash = "sha256:fc8868f63a2e6d268fb25f481995ba185a85a66fcad126f039323ff6635669ee"},
 ]
 identify = [
-    {file = "identify-2.4.3-py2.py3-none-any.whl", hash = "sha256:ac9c919c8ac5b90d03f8e1bce6dedcbd8a3b2a59c46737c04ed852e2d307af29"},
-    {file = "identify-2.4.3.tar.gz", hash = "sha256:8d80d877441073e7222ff272da45ca5ca1d901412790544b446e7d363ad5e9f0"},
+    {file = "identify-2.4.4-py2.py3-none-any.whl", hash = "sha256:aa68609c7454dbcaae60a01ff6b8df1de9b39fe6e50b1f6107ec81dcda624aa6"},
+    {file = "identify-2.4.4.tar.gz", hash = "sha256:6b4b5031f69c48bf93a646b90de9b381c6b5f560df4cbe0ed3cf7650ae741e4d"},
 ]
 importlib-metadata = [
     {file = "importlib_metadata-4.2.0-py3-none-any.whl", hash = "sha256:057e92c15bc8d9e8109738a48db0ccb31b4d9d5cfbee5a8670879a30be66304b"},
