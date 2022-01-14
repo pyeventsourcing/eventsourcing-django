@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
-from eventsourcing.tests.example_application import (
-    TIMEIT_FACTOR,
-    ExampleApplicationTestCase,
-)
+from eventsourcing.tests.application import TIMEIT_FACTOR, ExampleApplicationTestCase
 
 from tests.test_recorders import DjangoTestCase
 
