@@ -284,5 +284,5 @@ class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
                 application_name=self.application_name,
                 upstream_application_name=application_name,
                 notification_id=notification_id,
-            ).count()
-            return bool(q)
+            )
+            return bool(q.count())
