@@ -276,3 +276,13 @@ class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
             except IndexError:
                 max_id = 0
         return max_id
+
+    @errors
+    def has_tracking_id(self, application_name: str, notification_id: int) -> bool:
+        with self.serialize():
+            q = NotificationTrackingRecord.objects.using(alias=self.using).filter(
+                application_name=self.application_name,
+                upstream_application_name=application_name,
+                notification_id=notification_id,
+            ).count()
+            return bool(q)

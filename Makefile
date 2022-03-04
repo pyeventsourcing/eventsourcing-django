@@ -113,3 +113,11 @@ fmt: fmt-black fmt-isort
 .PHONY: test
 test:
 	$(POETRY) run python -m pytest $(opts) $(call tests,.)
+
+.PHONY: build
+build:
+	$(POETRY) build
+
+.PHONY: publish
+publish:
+	$(POETRY) publish
