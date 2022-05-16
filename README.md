@@ -113,3 +113,42 @@ assert tricks == ['roll over', 'play dead']
 For more information, please refer to the Python
 [eventsourcing](https://github.com/johnbywater/eventsourcing) library
 and the [Django](https://www.djangoproject.com/) project.
+
+
+## Management Commands
+
+The Django app `eventsourcing_django` ships with the following management commands.
+
+### Synchronise Followers
+
+Manually synchronise followers (i.e. `ProcessApplication` instances) with all of its
+leaders, as defined in the `eventsourcing.system.System`'s pipes.
+
+This command expects to find one, and only one, `eventsourcing.system.Runner` attribute
+defined on an installed Django app.
+
+Usage:
+
+```shell
+$ python manage.py sync_followers [FOLLOWER ...]
+```
+
+Examples:
+
+  - To synchronise all followers found in the runner:
+
+      ```shell
+      $ python manage.py sync_followers
+      ```
+
+  - To synchronise a single follower:
+
+      ```shell
+      $ python manage.py sync_followers TrainingSchool
+      ```
+
+The command supports the regular `-v/--verbosity` optional argument, as well as a
+`-n/--dry-run` flag.
+
+Note that running the command in dry-run mode *will* pull and process every new
+event, though the changes will eventually be rolled back.
