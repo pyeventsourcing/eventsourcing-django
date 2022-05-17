@@ -128,19 +128,7 @@ class TestWithSQLiteFileDb(TestSyncCommand):
     django_db_alias = "sqlite_filedb"
     databases = {"default", "sqlite_filedb"}
 
-    def test_dry_run_sync_one_app(self) -> None:
-        super().test_dry_run_sync_one_app()
-
-    def test_dry_run_sync_all_apps(self) -> None:
-        super().test_dry_run_sync_all_apps()
-
 
 class TestWithPostgres(TestSyncCommand):
     django_db_alias = "postgres"
     databases = {"default", "postgres"}
-
-    def test_dry_run_sync_one_app(self) -> None:
-        super().test_dry_run_sync_one_app()
-
-    def test_dry_run_sync_all_apps(self) -> None:
-        super().test_dry_run_sync_all_apps()
