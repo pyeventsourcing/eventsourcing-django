@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from functools import singledispatchmethod
-
 from eventsourcing.application import ProcessingEvent
-from eventsourcing.domain import AggregateEvent
+from eventsourcing.dispatch import singledispatchmethod
+from eventsourcing.domain import DomainEventProtocol
 from eventsourcing.persistence import Transcoder
 from eventsourcing.system import ProcessApplication
 from eventsourcing.tests.application import EmailAddressAsStr
@@ -16,13 +15,22 @@ class FormalEmailProcess(ProcessApplication):
         super().register_transcodings(transcoder)
         transcoder.register(EmailAddressAsStr())
 
-    @singledispatchmethod
     def policy(
-        self, domain_event: AggregateEvent, processing_event: ProcessingEvent
+        self,
+        domain_event: DomainEventProtocol,
+        processing_event: ProcessingEvent,
+    ) -> None:
+        self._policy(domain_event, processing_event)
+
+    @singledispatchmethod
+    def _policy(
+        self,
+        domain_event: DomainEventProtocol,
+        processing_event: ProcessingEvent,
     ) -> None:
         """Default policy"""
 
-    @policy.register
+    @_policy.register
     def _(
         self,
         domain_event: BankAccount.Opened,
@@ -45,13 +53,22 @@ class InformalEmailProcess(ProcessApplication):
         super().register_transcodings(transcoder)
         transcoder.register(EmailAddressAsStr())
 
-    @singledispatchmethod
     def policy(
-        self, domain_event: AggregateEvent, processing_event: ProcessingEvent
+        self,
+        domain_event: DomainEventProtocol,
+        processing_event: ProcessingEvent,
+    ) -> None:
+        self._policy(domain_event, processing_event)
+
+    @singledispatchmethod
+    def _policy(
+        self,
+        domain_event: DomainEventProtocol,
+        processing_event: ProcessingEvent,
     ) -> None:
         """Default policy"""
 
-    @policy.register
+    @_policy.register
     def _(
         self,
         domain_event: BankAccount.Opened,
