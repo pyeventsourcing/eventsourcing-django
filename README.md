@@ -124,29 +124,6 @@ The Django app `eventsourcing_django` ships with the following management comman
 Manually synchronise followers (i.e. `ProcessApplication` instances) with all of their
 leaders, as defined in the `eventsourcing.system.System`'s pipes.
 
-This command expects to find one, and only one, `eventsourcing.system.Runner` attribute
-defined on an installed Django app. This translates to, in Django parlance, defining the
-runner as an attribute of one `AppConfig`, such as:
-
-```python
-import eventsourcing.system
-from django.apps import AppConfig
-
-
-class MyEventSourcedAppConfig(AppConfig):
-    name = "my_event_sourced_app"
-    runner: eventsourcing.system.Runner
-
-    def ready(self) -> None:
-        self.runner = eventsourcing.system.SingleThreadedRunner(
-            eventsourcing.system.System(...)
-        )
-```
-
-The runner instance can be named however you wish as long as it inherits from
-`eventsourcing.system.Runner`. All runner classes shipped with the `eventsourcing`
-library are compatible.
-
 #### Usage
 
 ```shell
@@ -194,3 +171,61 @@ remaining followers.
 The base Django exceptions that are caught are `EmptyResultSet`, `FieldDoesNotExist`,
 `FieldError`, `MultipleObjectsReturned`, and `ObjectDoesNotExist`. The base exception
 `EventSourcingError` from the `eventsourcing` library is also caught per follower.
+
+### Configuration
+
+This command needs to access a `eventsourcing.system.Runner` instance to query and act
+on its followers. The runner's system is additionally the one defining the pipes between
+leaders and followers.
+
+The default behaviour, without additional configuration, is to inspect all installed
+Django apps and look for an instance of `eventsourcing.system.Runner`. The attribute
+name does not matter as long as it is public (i.e. not start with an underscore).
+
+```python
+# djangoproject/apps/my_es_app/apps.py
+import eventsourcing.system
+from django.apps import AppConfig
+
+
+class MyEventSourcedAppConfig(AppConfig):
+   name = "my_event_sourced_app"
+   runner: eventsourcing.system.Runner
+
+   def ready(self) -> None:
+       self.runner = eventsourcing.system.SingleThreadedRunner(
+           eventsourcing.system.System(...)
+       )
+```
+
+This is usually enough unless you i) have multiple runners defined in one or more apps,
+or ii) do not hold the runner(s) in Django apps. In which case, you should configure the
+Django setting `EVENTSOURCING_RUNNER` in one of two ways:
+
+1. Set `EVENTSOURCING_RUNNER` to an app name's attribute. This attribute must be a
+   `eventsourcing.system.Runner` instance.
+
+   ```python
+   # djangoproject/settings.py
+   ...
+   EVENTSOURCING_RUNNER = "my_event_sourced_app.runner"
+   ```
+
+2. Set `EVENTSOURCING_RUNNER` to a fully qualified function name. This function will be
+   called without arguments and should return a `eventsourcing.system.Runner` instance.
+
+   ```python
+   # djangoproject/settings.py
+   ...
+   EVENTSOURCING_RUNNER = "djangoproject.runner_utils.get_runner"
+   ```
+   ```python
+   # djangoproject/runner_utils.py
+   import eventsourcing.system
+
+
+   def get_runner() -> eventsourcing.system.Runner:
+      return ...
+   ```
+
+All runner classes shipped with the `eventsourcing` library are compatible.

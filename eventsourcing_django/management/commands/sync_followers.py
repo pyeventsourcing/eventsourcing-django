@@ -10,11 +10,14 @@ from typing import (
     Mapping,
     Optional,
     Tuple,
-    Type,
     TypeVar,
     cast,
 )
 
+import eventsourcing.system
+from django.apps.config import AppConfig
+from django.apps.registry import apps
+from django.conf import settings
 from django.core.exceptions import (
     EmptyResultSet,
     FieldDoesNotExist,
@@ -52,9 +55,40 @@ def sync_follower_with_leaders(
     return events_counter
 
 
-def discover_followers() -> Dict[str, Type[TApplication]]:
-    """Get all followers in the system."""
-    return {}  # TODO
+def get_eventsourcing_runner() -> Runner:
+    """Get the instance of a :class:`~eventsourcing.system.Runner` to run against.
+
+    Try to load the `EVENTSOURCING_RUNNER` Django setting first.
+    Fallback to finding a sole runner instance in the installed apps
+    with :func:`find_eventsourcing_runner` otherwise.
+    """
+    try:
+        app_attribute_or_function_qualified_name: str = settings.EVENTSOURCING_RUNNER
+    except AttributeError:
+        return find_eventsourcing_runner()
+
+    path_or_app_name, name = app_attribute_or_function_qualified_name.rsplit(".", 1)
+
+    try:
+        app_config = apps.get_app_config(path_or_app_name)
+    except LookupError:
+        import importlib
+
+        module = importlib.import_module(path_or_app_name)
+        get_runner = getattr(module, name, None)
+        runner = get_runner() if get_runner is not None else None
+    else:
+        runner = getattr(app_config, name, None)
+
+    if runner is None or not isinstance(runner, eventsourcing.system.Runner):
+        raise ValueError(
+            "The Django setting `EVENTSOURCING_RUNNER` is improperly set. Use an"
+            " app name with attribute (e.g. `my_event_sourced_app.runner`) or a"
+            " function which returns a runner instance (e.g."
+            " `djangoproject.runner_utils.get_runner`)."
+        )
+
+    return runner
 
 
 def find_eventsourcing_runner() -> Runner:
@@ -65,9 +99,6 @@ def find_eventsourcing_runner() -> Runner:
 
     :raise ValueError: If zero or more than one runner were found.
     """
-    from django.apps.config import AppConfig
-    from django.apps.registry import apps
-
     runners: List[Runner] = []
 
     for app_config in apps.get_app_configs():
@@ -147,7 +178,7 @@ class Command(BaseCommand):
         self.is_dry_run = options["dry_run"]
         self.has_failures = False
 
-        runner: Runner = find_eventsourcing_runner()
+        runner: Runner = get_eventsourcing_runner()
         system: System = runner.system
 
         selection, is_complete_selection = select_followers(system.followers, followers)

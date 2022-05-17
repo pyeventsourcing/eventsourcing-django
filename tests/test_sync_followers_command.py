@@ -6,6 +6,7 @@ import os
 import eventsourcing.system
 from django.apps.registry import apps
 from django.core.management import call_command
+from django.test import override_settings
 from eventsourcing.tests.application import BankAccounts
 
 from tests.emails.application import FormalEmailProcess, InformalEmailProcess
@@ -122,6 +123,16 @@ class TestSyncCommand(DjangoTestCase):
         # Neither of the follower apps have been synced.
         self.assertEqual(formal_emails.recorder.max_tracking_id("BankAccounts"), 0)
         self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+
+
+@override_settings(EVENTSOURCING_RUNNER="eventsourcing_runner_django.es_runner")
+class TestWithAppAttribute(TestSyncCommand):
+    pass
+
+
+@override_settings(EVENTSOURCING_RUNNER="tests.djangoproject.runner_utils.get_runner")
+class TestWithGetterFunction(TestSyncCommand):
+    pass
 
 
 class TestWithSQLiteFileDb(TestSyncCommand):
