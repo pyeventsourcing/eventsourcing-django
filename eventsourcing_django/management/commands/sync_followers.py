@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import argparse
+from collections import defaultdict
 from typing import (
     Any,
     Callable,
@@ -7,6 +8,7 @@ from typing import (
     Iterable,
     List,
     Mapping,
+    Optional,
     Tuple,
     Type,
     TypeVar,
@@ -17,6 +19,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from eventsourcing.application import Application
 from eventsourcing.system import Follower, Runner, System
+
+from eventsourcing_django.recorders import DjangoAggregateRecorder
 
 TApplication = TypeVar("TApplication", bound=Application)
 
@@ -97,6 +101,10 @@ def select_followers(
     return requested_followers, len(requested_followers) == len(all_followers)
 
 
+class DryRun(Exception):
+    pass
+
+
 class Command(BaseCommand):
     """The Follower apps synchronization command."""
 
@@ -134,19 +142,28 @@ class Command(BaseCommand):
         self._print_header(followers_count, is_complete_selection)
         _print_app_label = self._make_print_app_label(followers_count)
 
-        with transaction.atomic():
-            initial_state = transaction.savepoint()
+        follower_apps_by_alias: Dict[Optional[str], List[Follower]] = defaultdict(list)
 
-            for position, follower in enumerate(selection, start=1):
-                _print_app_label(position, follower)
-                follower_app = cast(Follower, runner.get(system.get_app_cls(follower)))
-                events_count = sync_follower_with_leaders(
-                    follower_app, system.follows[follower]
-                )
-                self._print_sync_success(events_count)
+        for position, follower in enumerate(selection, start=1):
+            _print_app_label(position, follower)
+            follower_app = cast(Follower, runner.get(system.get_app_cls(follower)))
+            recorder = cast(DjangoAggregateRecorder, follower_app.recorder)
+            alias = recorder.using
+            follower_apps_by_alias[alias].append(follower_app)
 
-            if self.is_dry_run:
-                transaction.savepoint_rollback(initial_state)
+        for alias, follower_apps in follower_apps_by_alias.items():
+            try:
+                with transaction.atomic(using=alias):
+                    for follower_app in follower_apps:
+                        events_count = sync_follower_with_leaders(
+                            follower_app, system.follows[follower_app.name]
+                        )
+                        self._print_sync_success(events_count)
+
+                    if self.is_dry_run:
+                        raise DryRun
+            except DryRun:
+                pass
 
     def _print_header(self, followers_count: int, is_complete_selection: bool) -> None:
         if not self.is_printing:

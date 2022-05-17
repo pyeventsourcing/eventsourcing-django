@@ -4,16 +4,15 @@ from __future__ import annotations
 import os
 
 import eventsourcing.system
-import pytest
 from django.apps.registry import apps
 from django.core.management import call_command
-from django.test import TransactionTestCase
 from eventsourcing.tests.application import BankAccounts
 
 from tests.emails.application import FormalEmailProcess, InformalEmailProcess
+from tests.test_recorders import DjangoTestCase
 
 
-class TestSyncCommand(TransactionTestCase):
+class TestSyncCommand(DjangoTestCase):
     django_db_alias = "default"
     runner: eventsourcing.system.Runner
 
@@ -129,11 +128,9 @@ class TestWithSQLiteFileDb(TestSyncCommand):
     django_db_alias = "sqlite_filedb"
     databases = {"default", "sqlite_filedb"}
 
-    @pytest.mark.xfail(reason="Transaction not rolled back?")
     def test_dry_run_sync_one_app(self) -> None:
         super().test_dry_run_sync_one_app()
 
-    @pytest.mark.xfail(reason="Transaction not rolled back?")
     def test_dry_run_sync_all_apps(self) -> None:
         super().test_dry_run_sync_all_apps()
 
@@ -142,10 +139,8 @@ class TestWithPostgres(TestSyncCommand):
     django_db_alias = "postgres"
     databases = {"default", "postgres"}
 
-    @pytest.mark.xfail(reason="Transaction not rolled back?")
     def test_dry_run_sync_one_app(self) -> None:
         super().test_dry_run_sync_one_app()
 
-    @pytest.mark.xfail(reason="Transaction not rolled back?")
     def test_dry_run_sync_all_apps(self) -> None:
         super().test_dry_run_sync_all_apps()
