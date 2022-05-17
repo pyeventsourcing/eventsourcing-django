@@ -121,19 +121,51 @@ The Django app `eventsourcing_django` ships with the following management comman
 
 ### Synchronise Followers
 
-Manually synchronise followers (i.e. `ProcessApplication` instances) with all of its
+Manually synchronise followers (i.e. `ProcessApplication` instances) with all of their
 leaders, as defined in the `eventsourcing.system.System`'s pipes.
 
 This command expects to find one, and only one, `eventsourcing.system.Runner` attribute
-defined on an installed Django app.
+defined on an installed Django app. This translates to, in Django parlance, defining the
+runner as an attribute of one `AppConfig`, such as:
 
-Usage:
+```python
+import eventsourcing.system
+from django.apps import AppConfig
 
-```shell
-$ python manage.py sync_followers [FOLLOWER ...]
+
+class MyEventSourcedAppConfig(AppConfig):
+    name = "my_event_sourced_app"
+    runner: eventsourcing.system.Runner
+
+    def ready(self) -> None:
+        self.runner = eventsourcing.system.SingleThreadedRunner(
+            eventsourcing.system.System(...)
+        )
 ```
 
-Examples:
+The runner instance can be named however you wish as long as it inherits from
+`eventsourcing.system.Runner`. All runner classes shipped with the `eventsourcing`
+library are compatible.
+
+#### Usage
+
+```shell
+$ python manage.py sync_followers [-n] [-v {0,1,2,3}] [follower [follower ...]]
+```
+
+Where `follower` denotes the name of a follower to synchronize. Not specifying any means
+synchronising *all followers* found in the system.
+
+Relevant options:
+
+  - `-n`, `--dry-run`: Load and process all unseen events for the selected followers,
+    but roll back all changes at the end.
+  - `-v {0,1,2,3}`, `--verbosity {0,1,2,3}`: Verbosity level; 0=minimal output, 1=normal
+    output, 2=verbose output, 3=very verbose output.
+
+For a full list of options, pass the `--help` flag to the command.
+
+#### Examples
 
   - To synchronise all followers found in the runner:
 

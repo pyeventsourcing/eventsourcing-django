@@ -112,21 +112,24 @@ class Command(BaseCommand):
     is_verbose: bool
     is_dry_run: bool
 
-    help = "Synchronize follower apps with events from their leader apps."  # noqa
+    help = "Synchronize follower apps with unseen events from their leader apps."
 
     def add_arguments(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument(
             "args",
-            metavar="followers",
+            metavar="follower",
             nargs="*",
             help="The followers to synchronize. Defaults to synchronize all followers.",
         )
         parser.add_argument(
-            "--dry-run",
             "-n",
+            "--dry-run",
             action="store_true",
             default=False,
-            help="Dry run, synchronize the followers but do not commit the changes.",
+            help=(
+                "Load and process all unseen events for the selected followers, but"
+                " roll back all changes at the end."
+            ),
         )
 
     def handle(self, *followers: str, **options: Any) -> None:
