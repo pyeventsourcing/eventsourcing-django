@@ -29,7 +29,7 @@ include = ["eventsourcing_django/py.typed"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-eventsourcing = { version = "~9.2.3" }
+eventsourcing = { version = "~9.2.13" }
 #eventsourcing = { path = "../eventsourcing/", extras = ["crypto"], develop = true }
 #eventsourcing = { git = "https://github.com/pyeventsourcing/eventsourcing.git", branch = "main", extras = ["crypto"]}
 Django = ">=2.2.24,<5.0"
