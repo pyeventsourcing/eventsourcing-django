@@ -184,3 +184,13 @@ The command supports the regular `-v/--verbosity` optional argument, as well as 
 
 Note that running the command in dry-run mode *will* pull and process every new
 event, though the changes will eventually be rolled back.
+
+#### Error handling
+
+Each selected follower should have its own chance at synchronisation. Therefore, the
+command will catch some exceptions on a per-follower basis and continue with the
+remaining followers.
+
+The base Django exceptions that are caught are `EmptyResultSet`, `FieldDoesNotExist`,
+`FieldError`, `MultipleObjectsReturned`, and `ObjectDoesNotExist`. The base exception
+`EventSourcingError` from the `eventsourcing` library is also caught per follower.

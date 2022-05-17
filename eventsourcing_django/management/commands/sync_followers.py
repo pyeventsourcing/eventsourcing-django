@@ -15,9 +15,17 @@ from typing import (
     cast,
 )
 
+from django.core.exceptions import (
+    EmptyResultSet,
+    FieldDoesNotExist,
+    FieldError,
+    MultipleObjectsReturned,
+    ObjectDoesNotExist,
+)
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from eventsourcing.application import Application
+from eventsourcing.domain import EventSourcingError
 from eventsourcing.system import Follower, Runner, System
 
 from eventsourcing_django.recorders import DjangoAggregateRecorder
@@ -111,6 +119,7 @@ class Command(BaseCommand):
     is_printing: bool
     is_verbose: bool
     is_dry_run: bool
+    has_failures: bool
 
     help = "Synchronize follower apps with unseen events from their leader apps."
 
@@ -136,6 +145,7 @@ class Command(BaseCommand):
         self.is_printing = options["verbosity"] > 0
         self.is_verbose = options["verbosity"] > 1
         self.is_dry_run = options["dry_run"]
+        self.has_failures = False
 
         runner: Runner = find_eventsourcing_runner()
         system: System = runner.system
@@ -145,28 +155,47 @@ class Command(BaseCommand):
         self._print_header(followers_count, is_complete_selection)
         _print_app_label = self._make_print_app_label(followers_count)
 
-        follower_apps_by_alias: Dict[Optional[str], List[Follower]] = defaultdict(list)
+        follower_apps_by_alias: Dict[
+            Optional[str], List[Tuple[int, Follower]]
+        ] = defaultdict(list)
 
         for position, follower in enumerate(selection, start=1):
-            _print_app_label(position, follower)
             follower_app = cast(Follower, runner.get(system.get_app_cls(follower)))
             recorder = cast(DjangoAggregateRecorder, follower_app.recorder)
             alias = recorder.using
-            follower_apps_by_alias[alias].append(follower_app)
+            follower_apps_by_alias[alias].append((position, follower_app))
 
         for alias, follower_apps in follower_apps_by_alias.items():
             try:
                 with transaction.atomic(using=alias):
-                    for follower_app in follower_apps:
-                        events_count = sync_follower_with_leaders(
-                            follower_app, system.follows[follower_app.name]
-                        )
-                        self._print_sync_success(events_count)
+                    for position, follower_app in follower_apps:
+                        _print_app_label(position, follower_app.name)
+                        try:
+                            events_count = sync_follower_with_leaders(
+                                follower_app, system.follows[follower_app.name]
+                            )
+                        except (
+                            EmptyResultSet,
+                            EventSourcingError,
+                            FieldDoesNotExist,
+                            FieldError,
+                            MultipleObjectsReturned,
+                            ObjectDoesNotExist,
+                        ) as error:
+                            self._print_sync_failure(error)
+                        else:
+                            self._print_sync_success(events_count)
 
                     if self.is_dry_run:
                         raise DryRun
             except DryRun:
                 pass
+
+        if self.is_printing and self.has_failures and not self.is_verbose:
+            self.stderr.write(
+                "There were errors during synchronisation, please re-run with a higher"
+                " verbosity level (try: `--verbosity 2`)."
+            )
 
     def _print_header(self, followers_count: int, is_complete_selection: bool) -> None:
         if not self.is_printing:
@@ -227,3 +256,21 @@ class Command(BaseCommand):
                 f"\t {event_count} event{'' if event_count == 1 else 's'} "
                 f"from {upstream_app} processed"
             )
+
+    def _print_sync_failure(self, error: EventSourcingError) -> None:
+        self.has_failures = True
+
+        if not self.is_printing:
+            return
+
+        if self.is_dry_run:
+            failure_msg = self.style.WARNING("FAILED (dry-run)")
+        else:
+            failure_msg = self.style.ERROR("FAILED")
+        self.stdout.write(failure_msg)
+
+        if self.is_verbose:
+            error_name = error.__class__.__name__
+            error_msg = str(error)
+            display_msg = f": {error_msg}" if error_msg else "."
+            self.stderr.write(f"\tCaught a {error_name}{display_msg}")
