@@ -113,3 +113,119 @@ assert tricks == ['roll over', 'play dead']
 For more information, please refer to the Python
 [eventsourcing](https://github.com/johnbywater/eventsourcing) library
 and the [Django](https://www.djangoproject.com/) project.
+
+
+## Management Commands
+
+The Django app `eventsourcing_django` ships with the following management commands.
+
+### Synchronise Followers
+
+Manually synchronise followers (i.e. `ProcessApplication` instances) with all of their
+leaders, as defined in the `eventsourcing.system.System`'s pipes.
+
+#### Usage
+
+```shell
+$ python manage.py sync_followers [-n] [-v {0,1,2,3}] [follower [follower ...]]
+```
+
+Where `follower` denotes the name of a follower to synchronize. Not specifying any means
+synchronising *all followers* found in the system.
+
+Relevant options:
+
+  - `-n`, `--dry-run`: Load and process all unseen events for the selected followers,
+    but roll back all changes at the end.
+  - `-v {0,1,2,3}`, `--verbosity {0,1,2,3}`: Verbosity level; 0=minimal output, 1=normal
+    output, 2=verbose output, 3=very verbose output.
+
+For a full list of options, pass the `--help` flag to the command.
+
+#### Examples
+
+  - To synchronise all followers found in the runner:
+
+      ```shell
+      $ python manage.py sync_followers
+      ```
+
+  - To synchronise a single follower:
+
+      ```shell
+      $ python manage.py sync_followers TrainingSchool
+      ```
+
+The command supports the regular `-v/--verbosity` optional argument, as well as a
+`-n/--dry-run` flag.
+
+Note that running the command in dry-run mode *will* pull and process every new
+event, though the changes will eventually be rolled back.
+
+#### Error handling
+
+Each selected follower should have its own chance at synchronisation. Therefore, the
+command will catch some exceptions on a per-follower basis and continue with the
+remaining followers.
+
+The base Django exceptions that are caught are `EmptyResultSet`, `FieldDoesNotExist`,
+`FieldError`, `MultipleObjectsReturned`, and `ObjectDoesNotExist`. The base exception
+`EventSourcingError` from the `eventsourcing` library is also caught per follower.
+
+### Configuration
+
+This command needs to access a `eventsourcing.system.Runner` instance to query and act
+on its followers. The runner's system is additionally the one defining the pipes between
+leaders and followers.
+
+The default behaviour, without additional configuration, is to inspect all installed
+Django apps and look for an instance of `eventsourcing.system.Runner`. The attribute
+name does not matter as long as it is public (i.e. not start with an underscore).
+
+```python
+# djangoproject/apps/my_es_app/apps.py
+import eventsourcing.system
+from django.apps import AppConfig
+
+
+class MyEventSourcedAppConfig(AppConfig):
+   name = "my_event_sourced_app"
+   runner: eventsourcing.system.Runner
+
+   def ready(self) -> None:
+       self.runner = eventsourcing.system.SingleThreadedRunner(
+           eventsourcing.system.System(...)
+       )
+```
+
+This is usually enough unless you i) have multiple runners defined in one or more apps,
+or ii) do not hold the runner(s) in Django apps. In which case, you should configure the
+Django setting `EVENTSOURCING_RUNNER` in one of two ways:
+
+1. Set `EVENTSOURCING_RUNNER` to an app name's attribute. This attribute must be a
+   `eventsourcing.system.Runner` instance.
+
+   ```python
+   # djangoproject/settings.py
+   ...
+   EVENTSOURCING_RUNNER = "my_event_sourced_app.runner"
+   ```
+
+2. Set `EVENTSOURCING_RUNNER` to a fully qualified function name. This function will be
+   called without arguments and should return a `eventsourcing.system.Runner` instance.
+
+   ```python
+   # djangoproject/settings.py
+   ...
+   EVENTSOURCING_RUNNER = "djangoproject.runner_utils.get_runner"
+   ```
+   ```python
+   # djangoproject/runner_utils.py
+   import eventsourcing.system
+
+
+   def get_runner() -> eventsourcing.system.Runner:
+      return ...
+   ```
+
+All runner classes shipped with the `eventsourcing` library are compatible.
