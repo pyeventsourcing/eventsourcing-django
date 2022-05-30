@@ -11,7 +11,7 @@ DJANGO_SETTINGS_MODULE ?= tests.djangoproject.settings
 DOTENV_BASE_FILE ?= .env-base
 DOTENV_LOCAL_FILE ?= .env
 
-POETRY_INSTALLER_URL ?= https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py
+POETRY_INSTALLER_URL ?= https://install.python-poetry.org
 
 -include $(DOTENV_BASE_FILE)
 -include $(DOTENV_LOCAL_FILE)
