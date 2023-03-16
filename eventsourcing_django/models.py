@@ -3,7 +3,6 @@ from django.db import models
 
 
 class StoredEventRecord(models.Model):
-
     id = models.BigAutoField(primary_key=True)
 
     # Application name.
@@ -30,7 +29,6 @@ class StoredEventRecord(models.Model):
 
 
 class SnapshotRecord(models.Model):
-
     uid = models.BigAutoField(primary_key=True)
 
     # Application name.
@@ -54,7 +52,6 @@ class SnapshotRecord(models.Model):
 
 
 class NotificationTrackingRecord(models.Model):
-
     uid = models.BigAutoField(primary_key=True)
 
     # Application name.

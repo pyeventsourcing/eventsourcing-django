@@ -186,9 +186,9 @@ class Command(BaseCommand):
         self._print_header(followers_count, is_complete_selection)
         _print_app_label = self._make_print_app_label(followers_count)
 
-        follower_apps_by_alias: Dict[
-            Optional[str], List[Tuple[int, Follower]]
-        ] = defaultdict(list)
+        follower_apps_by_alias: Dict[Optional[str], List[Tuple[int, Follower]]] = (
+            defaultdict(list)
+        )
 
         for position, follower in enumerate(selection, start=1):
             follower_app = cast(Follower, runner.get(system.get_app_cls(follower)))
@@ -259,8 +259,10 @@ class Command(BaseCommand):
 
         def printer(position: int, follower: str) -> None:
             self.stdout.write(
-                f"[{position:{position_format}}/{followers_count}] Synchronizing "
-                f"{self.style.MIGRATE_LABEL(follower)}...",
+                (
+                    f"[{position:{position_format}}/{followers_count}] Synchronizing "
+                    f"{self.style.MIGRATE_LABEL(follower)}..."
+                ),
                 ending=" ",
             )
 
