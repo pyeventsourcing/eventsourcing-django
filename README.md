@@ -92,12 +92,35 @@ in the application's environment.
 You may wish to construct the application object on a signal
 when the Django project is "ready". You can use the `ready()`
 method of the `AppConfig` class in the `apps.py` module of a
-Django app.
-
+Django app. If you migrate before including the TrainingSchool object into your code,
+this way should work fine in development:
 ```python
 school = TrainingSchool(env={
     "PERSISTENCE_MODULE": "eventsourcing_django",
 })
+```
+
+But usually you need migrations to run before creating the objects from database data
+and also put the created object into django app config:
+```python
+class TrainingSchoolConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "<project_name>.training_school"
+
+    def ready(self):
+        call_command("migrate")
+        self.create_training_school()
+
+    def create_training_school(self):
+        training_school = TrainingSchool(
+            env={"PERSISTENCE_MODULE": "eventsourcing_django"}
+        )
+        apps.get_app_config("training_school").training_school = training_school
+```
+
+And then use it like:
+```python
+school = apps.get_app_config("training_school").training_school
 ```
 
 The application's methods may be called from Django views and forms.
