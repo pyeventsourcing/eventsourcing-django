@@ -11,11 +11,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
-        django-version: ["3.0.14", "3.1.13", "3.2.8", "4.0"]
+        django-version: ["3.2.18", "4.0.10"]
         os: [ ubuntu-20.04 ]
         exclude:
           - python-version: "3.7"
-            django-version: "4.0"
+            django-version: "4.0.10"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +45,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
-        django-version: ["3.2.8"]
+        django-version: ["3.2.18"]
         os: [ubuntu-20.04]
     runs-on: ${{ matrix.os }}
     needs: prepare
@@ -68,11 +68,11 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
-        django-version: ["3.0.14", "3.1.13", "3.2.8", "4.0"]
+        django-version: ["3.2.18", "4.0.10"]
         os: [ubuntu-20.04]
         exclude:
           - python-version: "3.7"
-            django-version: "4.0"
+            django-version: "4.0.10"
     runs-on: ${{ matrix.os }}
     services:
       postgres:
