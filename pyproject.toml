@@ -28,11 +28,11 @@ repository = "https://github.com/pyeventsourcing/eventsourcing-django"
 include = ["eventsourcing_django/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.10"
 eventsourcing = { version = "~9.2.13" }
 #eventsourcing = { path = "../eventsourcing/", extras = ["crypto"], develop = true }
 #eventsourcing = { git = "https://github.com/pyeventsourcing/eventsourcing.git", branch = "main", extras = ["crypto"]}
-Django = ">=2.2.24,<5.0"
+Django = ">=5"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
