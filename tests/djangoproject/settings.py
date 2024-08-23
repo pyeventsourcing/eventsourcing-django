@@ -110,6 +110,9 @@ DATABASES = {
     "postgres": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": os.getenv("POSTGRES_DB", "eventsourcing_django"),
+        "TEST": {
+            "NAME": os.getenv("POSTGRES_DB", "eventsourcing_django"),
+        },
         "USER": os.getenv("POSTGRES_USER", "eventsourcing"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
         "HOST": os.getenv("POSTGRES_HOST", "127.0.0.1"),

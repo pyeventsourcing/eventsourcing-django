@@ -7,17 +7,17 @@ authors = [
 ]
 license = "BSD 3-Clause"
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Framework :: Django :: 2.2",
-    "Framework :: Django :: 3.0",
-    "Framework :: Django :: 3.1",
-    "Framework :: Django :: 3.2",
-    "Framework :: Django :: 4.0",
+    "Development Status :: 4 - Beta",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
     "Framework :: Django",
     "License :: OSI Approved :: BSD License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python",
@@ -27,16 +27,29 @@ homepage = "https://eventsourcing.readthedocs.io/"
 repository = "https://github.com/pyeventsourcing/eventsourcing-django"
 include = ["eventsourcing_django/py.typed"]
 
+
+
 [tool.poetry.dependencies]
-python = "^3.7"
-eventsourcing = { version = "~9.2.13" }
+python = "^3.8"
+eventsourcing = { version = "~9.3" }
 #eventsourcing = { path = "../eventsourcing/", extras = ["crypto"], develop = true }
 #eventsourcing = { git = "https://github.com/pyeventsourcing/eventsourcing.git", branch = "main", extras = ["crypto"]}
-Django = ">=2.2.24,<5.0"
+
+# Django 4.2 support Python 3.8 -> 3.12
+# Django 5.0 support Python 3.10 -> 3.12
+# Django 5.1 support Python 3.10 -> 3.13
+Django = [
+    {version = ">=4.2,<5.0", python = ">=3.8,<3.10"},
+    {version = ">=4.2,<5.2", python = ">=3.10,<3.12"},
+    {version = ">=5.1,<5.2", python = ">=3.12,<4.0"},
+]
 
 [tool.poetry.dev-dependencies]
 bandit = "*"
-black = { version = "*", allow-prereleases = true }
+black = [
+    {version = "<=24.8.0", python = "<3.9"},
+    {version = "*", python = "<4.0"},
+]
 flake8 = "*"
 flake8-broken-line = "*"
 flake8-bugbear = "*"
@@ -47,11 +60,16 @@ isort = "*"
 mypy = "*"
 pre-commit = "*"
 pre-commit-hooks = "*"
-psycopg2-binary = "2.9.5"
-pycryptodome = "~3.14.1"
+psycopg = { version = "*", extras = ["binary", "pool"] }
+psycopg2 = { version = "*", extras = ["binary"] }
+pycryptodome = "~3.21"
 pytest = "*"
-pytest-cov = "*"
+pytest-cov = [
+    {version = "<6.0", python = "<3.9"},
+    {version = "*", python = "<4.0"},
+]
 pytest-django = "*"
+#coverage = "<7.5.0"  # Because of PyCharm teamcity/pytest_plugin.py: TypeError: unhashable type: 'PythonFileReporter'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -10,33 +10,27 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-        django-version: ["3.2.18", "4.0.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
         os: [ ubuntu-20.04 ]
-        exclude:
-          - python-version: "3.7"
-            django-version: "4.0.10"
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up cache
         id: cached-dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /home/runner/.local
-          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-django-${{ matrix.django-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-${{ hashFiles('**/poetry.lock') }}
       - name: Install and set up Poetry
         if: steps.cached-dependencies.outputs.cache-hit != 'true'
         run: make install-poetry
       - name: Install packages
         if: steps.cached-dependencies.outputs.cache-hit != 'true'
         run: |
-            poetry remove django
             make install-packages opts="--no-root"
-            poetry run pip install django==${{ matrix.django-version }}
             poetry run python -c "import django; print('Django', django.__version__)"
             poetry run python -c "import psycopg2; print('Psycopg2', psycopg2.__version__)"
 
@@ -44,21 +38,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-        django-version: ["3.2.18"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
         os: [ubuntu-20.04]
     runs-on: ${{ matrix.os }}
     needs: prepare
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /home/runner/.local
-          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-django-${{ matrix.django-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-${{ hashFiles('**/poetry.lock') }}
       - name: Lint
         run: make lint
 
@@ -67,37 +60,40 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-        django-version: ["3.2.18", "4.0.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
         os: [ubuntu-20.04]
-        exclude:
-          - python-version: "3.7"
-            django-version: "4.0.10"
     runs-on: ${{ matrix.os }}
     services:
       postgres:
-        image: postgres:13.4
+        image: postgres:${{ matrix.postgres-version }}
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: postgres
         ports:
           - "5432:5432"
+        # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd="POSTGRES_PASSWORD=eventsourcing pg_isready -U eventsourcing -d eventsourcing_django"
-          --health-interval="10s"
-          --health-timeout="5s"
-          --health-retries="5"
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
       - name: Set up cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /home/runner/.local
-          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-django-${{ matrix.django-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-${{ hashFiles('**/poetry.lock') }}
+      - name: Setup database
+        run: |
+           PGPASSWORD=postgres psql -c 'CREATE DATABASE eventsourcing_django;' -U postgres -h localhost
+           PGPASSWORD=postgres psql -c "CREATE USER eventsourcing WITH PASSWORD 'eventsourcing';" -U postgres -h localhost
+           PGPASSWORD=postgres psql -c "ALTER DATABASE eventsourcing_django OWNER TO eventsourcing;" -U postgres -h localhost
+           PGPASSWORD=postgres psql eventsourcing -c "CREATE SCHEMA myschema AUTHORIZATION eventsourcing" -U postgres -h localhost
       - name: Run tests
         run: make test
         env:

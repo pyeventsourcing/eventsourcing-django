@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
 from typing import TYPE_CHECKING
 from unittest import skip
 
@@ -12,7 +11,6 @@ from eventsourcing.tests.persistence import (
     ApplicationRecorderTestCase,
     ProcessRecorderTestCase,
 )
-from eventsourcing.tests.postgres_utils import pg_close_all_connections
 
 from eventsourcing_django.models import SnapshotRecord, StoredEventRecord
 from eventsourcing_django.recorders import (
@@ -111,19 +109,20 @@ class TestDjangoApplicationRecorderWithSQLiteFileDb(TestDjangoApplicationRecorde
 
 class TestDjangoApplicationRecorderWithPostgres(TestDjangoApplicationRecorder):
     db_alias = "postgres"
-    databases = {"default", "postgres"}
+    # databases = {"default", "postgres"}
+    databases = {"postgres"}
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        # Need to close all connections Django made from other threads,
-        # otherwise Django can't tear down the database.
-        super().tearDownClass()
-        pg_close_all_connections(
-            host=os.getenv("POSTGRES_HOST", "127.0.0.1"),
-            name="test_" + os.getenv("POSTGRES_DB", "eventsourcing_django"),
-            user=os.getenv("POSTGRES_USER", "eventsourcing"),
-            password=os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
-        )
+    # @classmethod
+    # def tearDownClass(cls) -> None:
+    #     # Need to close all connections Django made from other threads,
+    #     # otherwise Django can't tear down the database.
+    #     super().tearDownClass()
+    #     pg_close_all_connections(
+    #         host=os.getenv("POSTGRES_HOST", "127.0.0.1"),
+    #         name="test_" + os.getenv("POSTGRES_DB", "eventsourcing_django"),
+    #         user=os.getenv("POSTGRES_USER", "eventsourcing"),
+    #         password=os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
+    #     )
 
 
 class TestDjangoProcessRecorder(DjangoTestCase, ProcessRecorderTestCase):

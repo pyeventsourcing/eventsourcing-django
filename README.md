@@ -24,25 +24,14 @@ install Python packages into a Python virtual environment.
 
 ## Django
 
-If you are using Django 3.2 or later, add `'eventsourcing_django'`
-to your Django project's `INSTALLED_APPS` setting.
+Add `'eventsourcing_django'` to your Django project's `INSTALLED_APPS` setting.
 
     INSTALLED_APPS = [
         ...
         'eventsourcing_django',
     ]
 
-If you are using Django 2.2, 3.0 or 3.1, please add
-`'eventsourcing_django.apps.EventsourcingConfig'` to your Django
-project's `INSTALLED_APPS` setting.
-
-    INSTALLED_APPS = [
-        ...
-        'eventsourcing_django.apps.EventsourcingConfig',
-    ]
-
-
-To migrate your database, please run Django's `manage.py migrate` command.
+Run Django's `manage.py migrate` command to create database tables for storing events.
 
     $ python manage.py migrate eventsourcing_django
 

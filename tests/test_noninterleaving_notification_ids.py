@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
 from typing import Optional
 
 from eventsourcing.tests.persistence import NonInterleavingNotificationIDsBaseCase
-from eventsourcing.tests.postgres_utils import pg_close_all_connections
 
 from eventsourcing_django.models import StoredEventRecord
 from eventsourcing_django.recorders import DjangoApplicationRecorder
@@ -37,12 +35,12 @@ class TestNonInterleavingPostgres(TestNonInterleaving):
         # Need to close all connections Django made from other threads,
         # otherwise Django can't tear down the database.
         super().tearDownClass()
-        pg_close_all_connections(
-            host=os.getenv("POSTGRES_HOST", "127.0.0.1"),
-            name="test_" + os.getenv("POSTGRES_DB", "eventsourcing_django"),
-            user=os.getenv("POSTGRES_USER", "eventsourcing"),
-            password=os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
-        )
+        # pg_close_all_connections(
+        #     host=os.getenv("POSTGRES_HOST", "127.0.0.1"),
+        #     name="test_" + os.getenv("POSTGRES_DB", "eventsourcing_django"),
+        #     user=os.getenv("POSTGRES_USER", "eventsourcing"),
+        #     password=os.getenv("POSTGRES_PASSWORD", "eventsourcing"),
+        # )
 
 
 del NonInterleavingNotificationIDsBaseCase
