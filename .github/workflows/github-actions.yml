@@ -91,8 +91,8 @@ jobs:
           key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-${{ hashFiles('**/poetry.lock') }}
       - name: Setup database
         run: |
-           PGPASSWORD=postgres psql -c 'CREATE DATABASE eventsourcing_django;' -U postgres -h localhost
            PGPASSWORD=postgres psql -c "CREATE USER eventsourcing WITH PASSWORD 'eventsourcing' CREATEDB;" -U postgres -h localhost
+#           PGPASSWORD=postgres psql -c 'CREATE DATABASE eventsourcing_django;' -U postgres -h localhost
 #           PGPASSWORD=postgres psql -c "ALTER DATABASE eventsourcing_django OWNER TO eventsourcing;" -U postgres -h localhost
 #           PGPASSWORD=postgres psql eventsourcing_django -c "CREATE SCHEMA myschema AUTHORIZATION eventsourcing" -U postgres -h localhost
       - name: Run tests
