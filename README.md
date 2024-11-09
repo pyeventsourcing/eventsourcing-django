@@ -110,7 +110,7 @@ call_command("migrate", database="postgres")
 To set up the Django framework for your Django project, `django.setup()` must have
 been called after setting environment variable `DJANGO_SETTINGS_MODULE` to indicate the
 settings module of your Django project. This is often done by a Django project's
-`manage.py`, `wsgi.py`, and `wsgi.py` files, and by tools that support Django users
+`manage.py`, `wsgi.py`, and `asgi.py` files, and by tools that support Django users
 such as test suite runners provided by IDEs that support Django. Django test suites
 usually automatically create and migrate databases when tests are run.
 
