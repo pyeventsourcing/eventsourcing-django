@@ -97,6 +97,9 @@ class TestDjangoApplicationRecorder(DjangoTestCase, ApplicationRecorderTestCase)
 
 
 class TestDjangoApplicationRecorderWithSQLiteInMemory(TestDjangoApplicationRecorder):
+    # db_alias = "default"
+    # databases = {"default"}
+
     @skip(reason="Get 'Database is locked' error with GitHub Actions")
     def test_concurrent_no_conflicts(self) -> None:
         super().test_concurrent_no_conflicts()
@@ -104,12 +107,11 @@ class TestDjangoApplicationRecorderWithSQLiteInMemory(TestDjangoApplicationRecor
 
 class TestDjangoApplicationRecorderWithSQLiteFileDb(TestDjangoApplicationRecorder):
     db_alias = "sqlite_filedb"
-    databases = {"default", "sqlite_filedb"}
+    databases = {"sqlite_filedb"}
 
 
 class TestDjangoApplicationRecorderWithPostgres(TestDjangoApplicationRecorder):
     db_alias = "postgres"
-    # databases = {"default", "postgres"}
     databases = {"postgres"}
 
     # @classmethod

@@ -1,8 +1,7 @@
 # Event Sourcing with Django
 
-This package supports using the Python
-[eventsourcing](https://github.com/pyeventsourcing/eventsourcing) library
-with [Django ORM](https://www.djangoproject.com/).
+This package is a Django app that supports using the Python
+[eventsourcing](https://github.com/pyeventsourcing/eventsourcing) library with the [Django ORM](https://www.djangoproject.com/).
 
 To use Django with your Python eventsourcing applications:
 * install the Python package `eventsourcing_django`
@@ -21,24 +20,13 @@ install Python packages into a Python virtual environment.
 
     $ pip install eventsourcing_django
 
+Alternatively, add `eventsourcing_django` to your project's `pyproject.yaml`
+or `requirements.txt` file and update your virtual environment accordingly.
 
-## Django
+## Event sourcing application
 
-Add `'eventsourcing_django'` to your Django project's `INSTALLED_APPS` setting.
-
-    INSTALLED_APPS = [
-        ...
-        'eventsourcing_django',
-    ]
-
-Run Django's `manage.py migrate` command to create database tables for storing events.
-
-    $ python manage.py migrate eventsourcing_django
-
-
-## Event sourcing
-
-Define aggregates and applications in the usual way.
+Define event-sourced aggregates and applications using the `Application` and
+`Aggregate` classes from the `eventsourcing` package.
 
 ```python
 from eventsourcing.application import Application
@@ -75,63 +63,193 @@ class Dog(Aggregate):
     def add_trick(self, trick):
         self.tricks.append(trick)
 ```
-Construct and use the application in the usual way.
-Set `PERSISTENCE_MODULE` to `'eventsourcing_django'`
-in the application's environment.
-You may wish to construct the application object on a signal
-when the Django project is "ready". You can use the `ready()`
-method of the `AppConfig` class in the `apps.py` module of a
-Django app. If you migrate before including the TrainingSchool object into your code,
-this way should work fine in development:
+
+The event sourcing application can be developed and tested independently of Django.
+
+Next, let's configure a Django project, and our event sourcing application, so
+that events of the event sourcing application are stored in a Django database.
+
+## Django project settings
+
+Add `'eventsourcing_django'` to your Django project's `INSTALLED_APPS` setting.
+
+    INSTALLED_APPS = [
+        ...
+        'eventsourcing_django',
+    ]
+
+This will make the Django models for storing events available in your Django project,
+and allow Django to create tables in your database for storing events.
+
+## Django database migration
+
+Run Django's `manage.py migrate` command to create database tables for storing events.
+
+    $ python manage.py migrate
+
+Use the `--database` option to create tables in a non-default database. The database
+alias must be a key in the `DATABASES` setting of your Django project.
+
+    $ python manage.py migrate --database=postgres
+
+Alternatively, after the Django framework has been set up for your project, you
+can call Django's `call_command()` function to create the database tables.
+
 ```python
-school = TrainingSchool(env={
-    "PERSISTENCE_MODULE": "eventsourcing_django",
-})
+from django.core.management import call_command
+
+call_command("migrate")
 ```
 
-But usually you need migrations to run before creating the objects from database data
-and also put the created object into django app config:
+Use the `database` keyword argument to create tables in a non-default database.
+
 ```python
+call_command("migrate", database="postgres")
+```
+
+To set up the Django framework for your Django project, `django.setup()` must have
+been called after setting environment variable `DJANGO_SETTINGS_MODULE` to indicate the
+settings module of your Django project. This is often done by a Django project's
+`manage.py`, `wsgi.py`, and `wsgi.py` files, and by tools that support Django users
+such as test suite runners provided by IDEs that support Django. Django test suites
+usually automatically create and migrate databases when tests are run.
+
+## Event sourcing in Django
+
+The event sourcing application can be configured to store events in the Django project's
+database by setting the environment variable `'PERSISTENCE_MODULE'` to
+`'eventsourcing_django'`. This step also depends on the Django framework having been
+set up to for your Django project, but it doesn't depend on the database tables having
+been created.
+
+```python
+training_school = TrainingSchool(
+    env={"PERSISTENCE_MODULE": "eventsourcing_django"},
+)
+```
+
+Use the application environment variable `'DJANGO_DB_ALIAS'` to configure the application
+to store events in a non-default Django project database. The value of `'DJANGO_DB_ALIAS'`
+must correspond to one of the keys in the `DATABASES` setting of the Django project.
+
+```python
+training_school = TrainingSchool(
+    env={
+        "PERSISTENCE_MODULE": "eventsourcing_django",
+        "DJANGO_DB_ALIAS": "postgres",
+    }
+)
+```
+
+You may wish to define your event sourcing application in a separate Django app,
+and construct your event sourcing application in a Django `AppConfig` subclass
+in its `apps.py` module.
+
+```python
+# In your apps.py file.
+from django.apps import AppConfig
+from django.core.management import call_command
+
 class TrainingSchoolConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "<project_name>.training_school"
+    name = "<django-project-name>.training_school"
 
     def ready(self):
         call_command("migrate")
         self.create_training_school()
 
     def create_training_school(self):
-        training_school = TrainingSchool(
+        self.training_school = TrainingSchool(
             env={"PERSISTENCE_MODULE": "eventsourcing_django"}
         )
-        apps.get_app_config("training_school").training_school = training_school
+
 ```
 
-And then use it like:
+You may also wish to centralize the definition of your event sourcing application's
+environment variables in your Django project's settings module, and use this when
+constructing the event sourcing application.
+
 ```python
-school = apps.get_app_config("training_school").training_school
+# Create secret cipher key.
+import os
+from eventsourcing.cipher import AESCipher
+os.environ["CIPHER_KEY"] = AESCipher.create_key(32)
+
+# In your settings.py file.
+import os
+
+EVENT_SOURCING_APPLICATION = {
+    "PERSISTENCE_MODULE": "eventsourcing_django",
+    "DJANGO_DB_ALIAS": "postgres",
+    "IS_SNAPSHOTTING_ENABLED": "y",
+    "COMPRESSOR_TOPIC": "eventsourcing.compressor:ZlibCompressor",
+    "CIPHER_TOPIC": "eventsourcing.cipher:AESCipher",
+    "CIPHER_KEY": os.environ["CIPHER_KEY"],
+}
+
+# In your apps.py file.
+from django.apps import AppConfig
+from django.conf import settings
+
+class TrainingSchoolConfig(AppConfig):
+    name = "<django-project-name>.training_school"
+
+    def ready(self):
+        self.training_school = TrainingSchool(env=settings.EVENT_SOURCING_APPLICATION)
 ```
 
-The application's methods may be called from Django views and forms.
+The single instance of the event sourcing application can then be obtained in other
+places, such as views, forms, management commands, and tests.
 
 ```python
-school.register('Fido')
-school.add_trick('Fido', 'roll over')
-school.add_trick('Fido', 'play dead')
-tricks = school.get_tricks('Fido')
+from django.apps import apps
+
+training_school = apps.get_app_config("training_school").training_school
+```
+
+The event sourcing application's methods can be called in views, forms,
+management commands, and tests.
+
+```python
+training_school.register('Fido')
+
+training_school.add_trick('Fido', 'roll over')
+training_school.add_trick('Fido', 'play dead')
+
+tricks = training_school.get_tricks('Fido')
 assert tricks == ['roll over', 'play dead']
 ```
+
+Events will be stored in the Django project's database, so long as the
+database tables have been created before the event sourcing application
+methods are called. If the database tables have not been created, an
+`OperationalError` will be raised to indicate that the tables are not found.
+
+## Summary
+
+In summary, before constructing an event sourcing application with `eventsourcing_django`
+as its persistence module, the Django framework must have been set up for a Django
+project that has `'eventsourcing_django'` included in its `INSTALLED_APPS` setting.
+And, before calling the methods of the event sourcing application, the Django project's
+database must have been migrated.
 
 For more information, please refer to the Python
 [eventsourcing](https://github.com/johnbywater/eventsourcing) library
 and the [Django](https://www.djangoproject.com/) project.
 
 
-## Management Commands
+## Management commands
 
-The Django app `eventsourcing_django` ships with the following management commands.
+The `eventsourcing_django` package is a Django app which ships with the following
+Django management commands. They are available in Django projects that have
+`'eventsourcing_django'` included in their `INSTALLED_APPS` setting.
 
-### Synchronise Followers
+At the moment, there is only one management command: `sync_followers`.
+
+The `sync_followers` management command helps users of the `eventsourcing.system`
+module. Please refer to the `eventsourcing` package docs for more information
+about the `eventsourcing.system` module.
+
+### Synchronise followers
 
 Manually synchronise followers (i.e. `ProcessApplication` instances) with all of their
 leaders, as defined in the `eventsourcing.system.System`'s pipes.

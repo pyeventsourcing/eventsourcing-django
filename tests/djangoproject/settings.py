@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "eventsourcing_django.apps.EventsourcingConfig",
+    "eventsourcing_django",
     "tests.eventsourcing_runner_django.apps.EventSourcingSystemRunnerConfig",
 ]
 
@@ -111,7 +111,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": os.getenv("POSTGRES_DB", "eventsourcing_django"),
         "TEST": {
-            "NAME": "test_" + os.getenv("POSTGRES_DB", "eventsourcing_django"),
+            "NAME": os.getenv("POSTGRES_DB", "eventsourcing_django"),
         },
         "USER": os.getenv("POSTGRES_USER", "eventsourcing"),
         "PASSWORD": os.getenv("POSTGRES_PASSWORD", "eventsourcing"),

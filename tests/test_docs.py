@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
+from subprocess import PIPE, Popen
 from tempfile import NamedTemporaryFile
 
 from tests.test_recorders import DjangoTestCase
@@ -11,11 +13,16 @@ BASE_DIR = Path(__file__).parents[1]
 
 
 class TestDocs(DjangoTestCase):
+    databases = {"default", "postgres"}
+
     def setUp(self) -> None:
         super().setUp()
+        self.original_django_settings_module = os.environ["DJANGO_SETTINGS_MODULE"]
+        os.environ["DJANGO_SETTINGS_MODULE"] = "tests.djangoproject.settings_testdocs"
 
     def tearDown(self) -> None:
         self.clean_env()
+        os.environ["DJANGO_SETTINGS_MODULE"] = self.original_django_settings_module
 
     def clean_env(self) -> None:
         keys = [
@@ -133,39 +140,48 @@ class TestDocs(DjangoTestCase):
 
         print(f"{num_code_lines} lines of code in {doc_path}")
 
+        self.assertEqual("", lines[0])
+        self.assertEqual("", lines[1])
+        lines[0] = "import django"
+        lines[1] = "django.setup()"
+
         # Write the code into a temp file.
         tempfile = NamedTemporaryFile("w+")
         source = "\n".join(lines) + "\n"
         tempfile.writelines(source)
         tempfile.flush()
 
-        exec(
-            compile(source=source, filename=doc_path, mode="exec"), globals(), globals()
-        )
-        return
+        # exec(
+        #     compile(source=source, filename=doc_path, mode="exec"), globals(), globals()
+        # )
+        # return
 
         # print(Path.cwd())
         # print("\n".join(lines) + "\n")
         #
-        # # Run the code and catch errors.
-        # p = Popen(
-        #     [sys.executable, temp_path],
-        #     stdout=PIPE,
-        #     stderr=PIPE,
-        #     env={"PYTHONPATH": BASE_DIR},
-        # )
-        # print(sys.executable, temp_path, PIPE)
-        # out, err = p.communicate()
-        # decoded_out = out.decode("utf8").replace(temp_path, str(doc_path))
-        # decoded_err = err.decode("utf8").replace(temp_path, str(doc_path))
-        # exit_status = p.wait()
-        #
-        # print(decoded_out)
-        # print(decoded_err)
-        #
-        # # Check for errors running the code.
-        # if exit_status:
-        #     self.fail(decoded_out + decoded_err)
-        #
-        # # Close (deletes) the tempfile.
-        # tempfile.close()
+        # Run the code and catch errors.
+        # - need to run this in a subprocess so we can django.setup() with alternative settings
+        env = os.environ.copy()
+        env["PYTHONPATH"] = str(BASE_DIR)
+        p = Popen(
+            [sys.executable, tempfile.name],
+            stdout=PIPE,
+            stderr=PIPE,
+            env=env,
+            # cwd=BASE_DIR,
+        )
+        print(sys.executable, tempfile.name, PIPE)
+        out, err = p.communicate()
+        decoded_out = out.decode("utf8").replace(tempfile.name, str(doc_path))
+        decoded_err = err.decode("utf8").replace(tempfile.name, str(doc_path))
+        exit_status = p.wait()
+
+        print(decoded_out)
+        print(decoded_err)
+
+        # Check for errors running the code.
+        if exit_status:
+            self.fail(decoded_out + decoded_err)
+
+        # Close (deletes) the tempfile.
+        tempfile.close()

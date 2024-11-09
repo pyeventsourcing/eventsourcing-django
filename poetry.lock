@@ -434,13 +434,13 @@ bcrypt = ["bcrypt"]
 
 [[package]]
 name = "eventsourcing"
-version = "9.3.4"
+version = "9.3.5"
 description = "Event sourcing in Python"
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "eventsourcing-9.3.4-py3-none-any.whl", hash = "sha256:e27d7ade8ebea1738f11f52ffc84355a8f09ce88e55b05d06a0255bedd44f9c3"},
-    {file = "eventsourcing-9.3.4.tar.gz", hash = "sha256:2c75560ed0325093f0c05fd1881987dcd8854b23cb4ea8b1dfad7ae43297bca8"},
+    {file = "eventsourcing-9.3.5-py3-none-any.whl", hash = "sha256:7debbf1fbf5381cd3b072356a00fd21d6bd29ccf526412e3ca061cfe3068a92b"},
+    {file = "eventsourcing-9.3.5.tar.gz", hash = "sha256:30ba7cc28c409abff0005967e9053f2f81334acb796793806444ed081f95a4f6"},
 ]
 
 [package.dependencies]
@@ -1359,4 +1359,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "38e27aa95bc0a8e9a78d2e093cc5707a7636e6069f20cae6a2e1e24487306edd"
+content-hash = "831efda271f93d57acedf4f3d7283ccc0a3f3b140483606bd064e7d9bc625c73"
