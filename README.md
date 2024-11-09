@@ -98,13 +98,13 @@ can call Django's `call_command()` function to create the database tables.
 ```python
 from django.core.management import call_command
 
-call_command("migrate")
+call_command('migrate')
 ```
 
 Use the `database` keyword argument to create tables in a non-default database.
 
 ```python
-call_command("migrate", database="postgres")
+call_command('migrate', database='postgres')
 ```
 
 To set up the Django framework for your Django project, `django.setup()` must have
@@ -117,26 +117,26 @@ usually automatically create and migrate databases when tests are run.
 ## Event sourcing in Django
 
 The event sourcing application can be configured to store events in the Django project's
-database by setting the environment variable `'PERSISTENCE_MODULE'` to
+database by setting the environment variable `PERSISTENCE_MODULE` to
 `'eventsourcing_django'`. This step also depends on the Django framework having been
 set up to for your Django project, but it doesn't depend on the database tables having
 been created.
 
 ```python
 training_school = TrainingSchool(
-    env={"PERSISTENCE_MODULE": "eventsourcing_django"},
+    env={'PERSISTENCE_MODULE': 'eventsourcing_django'},
 )
 ```
 
-Use the application environment variable `'DJANGO_DB_ALIAS'` to configure the application
-to store events in a non-default Django project database. The value of `'DJANGO_DB_ALIAS'`
+Use the application environment variable `DJANGO_DB_ALIAS` to configure the application
+to store events in a non-default Django project database. The value of `DJANGO_DB_ALIAS`
 must correspond to one of the keys in the `DATABASES` setting of the Django project.
 
 ```python
 training_school = TrainingSchool(
     env={
-        "PERSISTENCE_MODULE": "eventsourcing_django",
-        "DJANGO_DB_ALIAS": "postgres",
+        'PERSISTENCE_MODULE': 'eventsourcing_django',
+        'DJANGO_DB_ALIAS': 'postgres',
     }
 )
 ```
@@ -148,18 +148,13 @@ in its `apps.py` module.
 ```python
 # In your apps.py file.
 from django.apps import AppConfig
-from django.core.management import call_command
 
 class TrainingSchoolConfig(AppConfig):
-    name = "<django-project-name>.training_school"
+    name = '<django-project-name>.training_school'
 
     def ready(self):
-        call_command("migrate")
-        self.create_training_school()
-
-    def create_training_school(self):
         self.training_school = TrainingSchool(
-            env={"PERSISTENCE_MODULE": "eventsourcing_django"}
+            env={'PERSISTENCE_MODULE': 'eventsourcing_django'}
         )
 
 ```
@@ -172,18 +167,18 @@ constructing the event sourcing application.
 # Create secret cipher key.
 import os
 from eventsourcing.cipher import AESCipher
-os.environ["CIPHER_KEY"] = AESCipher.create_key(32)
+os.environ['CIPHER_KEY'] = AESCipher.create_key(32)
 
 # In your settings.py file.
 import os
 
 EVENT_SOURCING_APPLICATION = {
-    "PERSISTENCE_MODULE": "eventsourcing_django",
-    "DJANGO_DB_ALIAS": "postgres",
-    "IS_SNAPSHOTTING_ENABLED": "y",
-    "COMPRESSOR_TOPIC": "eventsourcing.compressor:ZlibCompressor",
-    "CIPHER_TOPIC": "eventsourcing.cipher:AESCipher",
-    "CIPHER_KEY": os.environ["CIPHER_KEY"],
+    'PERSISTENCE_MODULE': 'eventsourcing_django',
+    'DJANGO_DB_ALIAS': 'postgres',
+    'IS_SNAPSHOTTING_ENABLED': 'y',
+    'COMPRESSOR_TOPIC': 'eventsourcing.compressor:ZlibCompressor',
+    'CIPHER_TOPIC': 'eventsourcing.cipher:AESCipher',
+    'CIPHER_KEY': os.environ['CIPHER_KEY'],
 }
 
 # In your apps.py file.
@@ -191,7 +186,7 @@ from django.apps import AppConfig
 from django.conf import settings
 
 class TrainingSchoolConfig(AppConfig):
-    name = "<django-project-name>.training_school"
+    name = '<django-project-name>.training_school'
 
     def ready(self):
         self.training_school = TrainingSchool(env=settings.EVENT_SOURCING_APPLICATION)
@@ -203,7 +198,7 @@ places, such as views, forms, management commands, and tests.
 ```python
 from django.apps import apps
 
-training_school = apps.get_app_config("training_school").training_school
+training_school = apps.get_app_config('training_school').training_school
 ```
 
 The event sourcing application's methods can be called in views, forms,
@@ -319,7 +314,7 @@ from django.apps import AppConfig
 
 
 class MyEventSourcedAppConfig(AppConfig):
-   name = "my_event_sourced_app"
+   name = 'my_event_sourced_app'
    runner: eventsourcing.system.Runner
 
    def ready(self) -> None:
@@ -338,7 +333,7 @@ Django setting `EVENTSOURCING_RUNNER` in one of two ways:
    ```python
    # djangoproject/settings.py
    ...
-   EVENTSOURCING_RUNNER = "my_event_sourced_app.runner"
+   EVENTSOURCING_RUNNER = 'my_event_sourced_app.runner'
    ```
 
 2. Set `EVENTSOURCING_RUNNER` to a fully qualified function name. This function will be
@@ -347,7 +342,7 @@ Django setting `EVENTSOURCING_RUNNER` in one of two ways:
    ```python
    # djangoproject/settings.py
    ...
-   EVENTSOURCING_RUNNER = "djangoproject.runner_utils.get_runner"
+   EVENTSOURCING_RUNNER = 'djangoproject.runner_utils.get_runner'
    ```
    ```python
    # djangoproject/runner_utils.py
