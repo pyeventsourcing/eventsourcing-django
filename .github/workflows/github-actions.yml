@@ -1,68 +1,15 @@
 name: CI
 on: [push, pull_request]
 
-env:
-  POETRY_HOME: /home/runner/.local
-  POETRY_CACHE_DIR: /home/runner/.local/.cache
-
 jobs:
-  prepare:
+  lint-and-test-code:
     strategy:
+      max-parallel: 30
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        os: [ runs-on: ubuntu-latest ]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Set up cache
-        id: cached-dependencies
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/.local
-          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-${{ hashFiles('**/poetry.lock') }}
-      - name: Install and set up Poetry
-        if: steps.cached-dependencies.outputs.cache-hit != 'true'
-        run: make install-poetry
-      - name: Install packages
-        if: steps.cached-dependencies.outputs.cache-hit != 'true'
-        run: |
-            make install-packages opts="--no-root"
-            poetry run python -c "import django; print('Django', django.__version__)"
-            poetry run python -c "import psycopg2; print('Psycopg2', psycopg2.__version__)"
-
-  lint:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        os: [runs-on: ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-    needs: prepare
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Set up cache
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/.local
-          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-${{ hashFiles('**/poetry.lock') }}
-      - name: Lint
-        run: make lint
-
-  tests:
-    needs: prepare
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
-        postgres-version: ["13", "14", "15", "16", "17"]
-        os: [runs-on: ubuntu-latest]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        postgres-version: ["14", "15", "16", "17"]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     services:
       postgres:
@@ -84,17 +31,21 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Set up cache
-        uses: actions/cache@v4
-        with:
-          path: /home/runner/.local
-          key: os-${{ matrix.os }}-python-${{ matrix.python-version}}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install and set up Poetry
+        run: make install-poetry
       - name: Setup database
         run: |
            PGPASSWORD=postgres psql -c "CREATE USER eventsourcing WITH PASSWORD 'eventsourcing' CREATEDB;" -U postgres -h localhost
 #           PGPASSWORD=postgres psql -c 'CREATE DATABASE eventsourcing_django;' -U postgres -h localhost
 #           PGPASSWORD=postgres psql -c "ALTER DATABASE eventsourcing_django OWNER TO eventsourcing;" -U postgres -h localhost
 #           PGPASSWORD=postgres psql eventsourcing_django -c "CREATE SCHEMA myschema AUTHORIZATION eventsourcing" -U postgres -h localhost
+      - name: Install packages
+        run: |
+            make install-packages opts="--no-root"
+            poetry@2.1.2 run python -c "import django; print('Django', django.__version__)"
+            poetry@2.1.2 run python -c "import psycopg2; print('Psycopg2', psycopg2.__version__)"
+      - name: Lint
+        run: make lint
       - name: Run tests
         run: make test
         env:
