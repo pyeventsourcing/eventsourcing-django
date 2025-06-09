@@ -3,8 +3,8 @@
 COMPOSE_FILE ?= docker/docker-compose-local.yml
 COMPOSE_PROJECT_NAME ?= eventsourcing_django
 
-POETRY_VERSION = 1.3.2
-POETRY ?= poetry
+POETRY_VERSION=2.1.2
+POETRY ?= poetry@$(POETRY_VERSION)
 
 DJANGO_SETTINGS_MODULE ?= tests.djangoproject.settings
 
@@ -18,7 +18,7 @@ POETRY_INSTALLER_URL ?= https://install.python-poetry.org
 
 .PHONY: install-poetry
 install-poetry:
-	curl -sSL $(POETRY_INSTALLER_URL) | python3
+	@pipx install --suffix="@$(POETRY_VERSION)" "poetry==$(POETRY_VERSION)"
 	$(POETRY) --version
 
 .PHONY: install-packages
@@ -37,13 +37,16 @@ ifeq ($(opts),)
 	$(POETRY) run pre-commit uninstall
 endif
 
-.PHONY: lock-packages
-lock-packages:
-	$(POETRY) lock -vv --no-update
+.PHONY: install
+install:
+	$(POETRY) sync --all-extras $(opts)
 
-.PHONY: update-packages
-update-packages:
-	$(POETRY) update -vv
+.PHONY: update
+update: update-lock install
+
+.PHONY: update-lock
+update-lock:
+	$(POETRY) update --lock -v
 
 .PHONY: docker-up
 docker-up:
