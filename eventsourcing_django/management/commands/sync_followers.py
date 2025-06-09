@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import argparse
 from collections import defaultdict
 from typing import (
@@ -13,6 +15,7 @@ from typing import (
     TypeVar,
     cast,
 )
+from uuid import UUID
 
 import eventsourcing.system
 from django.apps.config import AppConfig
@@ -33,11 +36,11 @@ from eventsourcing.system import Follower, Runner, System
 
 from eventsourcing_django.recorders import DjangoAggregateRecorder
 
-TApplication = TypeVar("TApplication", bound=Application)
+TApplication = TypeVar("TApplication", bound=Application[Any])
 
 
 def sync_follower_with_leaders(
-    follower: Follower, leader_names: Iterable[str]
+    follower: Follower[UUID | str], leader_names: Iterable[str]
 ) -> Dict[str, int]:
     """Synchronize a follower with its leader apps."""
     events_counter = {}
@@ -46,8 +49,10 @@ def sync_follower_with_leaders(
         # The library isn't telling us how many events it actually processed,
         # so we first do a dry-run selection of all new notifications.
         events_counter[leader_name] = 0
-        start = follower.recorder.max_tracking_id(leader_name) + 1
-        for batch in follower.pull_notifications(leader_name, start):
+        start = follower.recorder.max_tracking_id(leader_name)
+        for batch in follower.pull_notifications(
+            leader_name, start, inclusive_of_start=False
+        ):
             events_counter[leader_name] += len(batch)
 
         follower.pull_and_process(leader_name, start)
@@ -55,7 +60,7 @@ def sync_follower_with_leaders(
     return events_counter
 
 
-def get_eventsourcing_runner() -> Runner:
+def get_eventsourcing_runner() -> Runner[UUID | str]:
     """Get the instance of a :class:`~eventsourcing.system.Runner` to run against.
 
     Try to load the `EVENTSOURCING_RUNNER` Django setting first.
@@ -91,7 +96,7 @@ def get_eventsourcing_runner() -> Runner:
     return runner
 
 
-def find_eventsourcing_runner() -> Runner:
+def find_eventsourcing_runner() -> Runner[UUID | str]:
     """Find an instance of a :class:`~eventsourcing.system.Runner` in Django apps.
 
     There must be only one Django app exposing a single
@@ -99,7 +104,7 @@ def find_eventsourcing_runner() -> Runner:
 
     :raise ValueError: If zero or more than one runner were found.
     """
-    runners: List[Runner] = []
+    runners: List[Runner[UUID | str]] = []
 
     for app_config in apps.get_app_configs():
         assert isinstance(app_config, AppConfig)
@@ -178,7 +183,7 @@ class Command(BaseCommand):
         self.is_dry_run = options["dry_run"]
         self.has_failures = False
 
-        runner: Runner = get_eventsourcing_runner()
+        runner: Runner[UUID | str] = get_eventsourcing_runner()
         system: System = runner.system
 
         selection, is_complete_selection = select_followers(system.followers, followers)
@@ -186,12 +191,12 @@ class Command(BaseCommand):
         self._print_header(followers_count, is_complete_selection)
         _print_app_label = self._make_print_app_label(followers_count)
 
-        follower_apps_by_alias: Dict[Optional[str], List[Tuple[int, Follower]]] = (
-            defaultdict(list)
-        )
+        follower_apps_by_alias: Dict[
+            Optional[str], List[Tuple[int, Follower[UUID | str]]]
+        ] = defaultdict(list)
 
         for position, follower in enumerate(selection, start=1):
-            follower_app = cast(Follower, runner.get(system.get_app_cls(follower)))
+            follower_app = cast(Follower[Any], runner.get(system.get_app_cls(follower)))
             recorder = cast(DjangoAggregateRecorder, follower_app.recorder)
             alias = recorder.using
             follower_apps_by_alias[alias].append((position, follower_app))

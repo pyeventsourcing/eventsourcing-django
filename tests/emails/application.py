@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+from uuid import UUID
+
 from eventsourcing.application import ProcessingEvent
 from eventsourcing.dispatch import singledispatchmethod
 from eventsourcing.domain import DomainEventProtocol
-from eventsourcing.persistence import Transcoder
+from eventsourcing.persistence import JSONTranscoder
 from eventsourcing.system import ProcessApplication
 from eventsourcing.tests.application import EmailAddressAsStr
 from eventsourcing.tests.domain import BankAccount
@@ -10,23 +12,23 @@ from eventsourcing.tests.domain import BankAccount
 from tests.emails.domain import EmailNotification
 
 
-class FormalEmailProcess(ProcessApplication):
-    def register_transcodings(self, transcoder: Transcoder) -> None:
+class FormalEmailProcess(ProcessApplication[UUID]):
+    def register_transcodings(self, transcoder: JSONTranscoder) -> None:
         super().register_transcodings(transcoder)
         transcoder.register(EmailAddressAsStr())
 
     def policy(
         self,
-        domain_event: DomainEventProtocol,
-        processing_event: ProcessingEvent,
+        domain_event: DomainEventProtocol[UUID],
+        processing_event: ProcessingEvent[UUID],
     ) -> None:
         self._policy(domain_event, processing_event)
 
     @singledispatchmethod
     def _policy(
         self,
-        domain_event: DomainEventProtocol,
-        processing_event: ProcessingEvent,
+        domain_event: DomainEventProtocol[UUID],
+        processing_event: ProcessingEvent[UUID],
     ) -> None:
         """Default policy"""
 
@@ -34,7 +36,7 @@ class FormalEmailProcess(ProcessApplication):
     def _(
         self,
         domain_event: BankAccount.Opened,
-        processing_event: ProcessingEvent,
+        processing_event: ProcessingEvent[UUID],
     ) -> None:
         notification = EmailNotification.create(
             to=domain_event.email_address,
@@ -48,23 +50,23 @@ class FormalEmailProcess(ProcessApplication):
         processing_event.collect_events(notification)
 
 
-class InformalEmailProcess(ProcessApplication):
-    def register_transcodings(self, transcoder: Transcoder) -> None:
+class InformalEmailProcess(ProcessApplication[UUID]):
+    def register_transcodings(self, transcoder: JSONTranscoder) -> None:
         super().register_transcodings(transcoder)
         transcoder.register(EmailAddressAsStr())
 
     def policy(
         self,
-        domain_event: DomainEventProtocol,
-        processing_event: ProcessingEvent,
+        domain_event: DomainEventProtocol[UUID],
+        processing_event: ProcessingEvent[UUID],
     ) -> None:
         self._policy(domain_event, processing_event)
 
     @singledispatchmethod
     def _policy(
         self,
-        domain_event: DomainEventProtocol,
-        processing_event: ProcessingEvent,
+        domain_event: DomainEventProtocol[UUID],
+        processing_event: ProcessingEvent[UUID],
     ) -> None:
         """Default policy"""
 
@@ -72,7 +74,7 @@ class InformalEmailProcess(ProcessApplication):
     def _(
         self,
         domain_event: BankAccount.Opened,
-        processing_event: ProcessingEvent,
+        processing_event: ProcessingEvent[UUID],
     ) -> None:
         notification = EmailNotification.create(
             to=domain_event.email_address,

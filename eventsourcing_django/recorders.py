@@ -26,6 +26,7 @@ from eventsourcing.persistence import (
     ProcessRecorder,
     ProgrammingError,
     StoredEvent,
+    Subscription,
     Tracking,
 )
 
@@ -204,17 +205,23 @@ class DjangoApplicationRecorder(DjangoAggregateRecorder, ApplicationRecorder):
     @errors
     def select_notifications(
         self,
-        start: int,
+        start: int | None,
         limit: int,
         stop: Optional[int] = None,
         topics: Sequence[str] = (),
+        *,
+        inclusive_of_start: bool = True,
     ) -> List[Notification]:
         with self.serialize():
             q = self.model.objects.using(alias=self.using).filter(
                 application_name=self.application_name,
             )
             q = q.order_by("id")
-            q = q.filter(id__gte=start)
+            if start is not None:
+                if inclusive_of_start:
+                    q = q.filter(id__gte=start)
+                else:
+                    q = q.filter(id__gt=start)
             if stop is not None:
                 q = q.filter(id__lte=stop)
             if topics:
@@ -233,7 +240,7 @@ class DjangoApplicationRecorder(DjangoAggregateRecorder, ApplicationRecorder):
         ]
 
     @errors
-    def max_notification_id(self) -> int:
+    def max_notification_id(self) -> int | None:
         with self.serialize():
             q = self.model.objects.using(alias=self.using).filter(
                 application_name=self.application_name,
@@ -242,8 +249,13 @@ class DjangoApplicationRecorder(DjangoAggregateRecorder, ApplicationRecorder):
             try:
                 max_id = q[0].id
             except IndexError:
-                max_id = 0
+                max_id = None
         return max_id
+
+    def subscribe(
+        self, gt: int | None = None, topics: Sequence[str] = ()
+    ) -> Subscription[ApplicationRecorder]:
+        raise NotImplementedError
 
 
 class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
@@ -264,7 +276,7 @@ class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
         return notification_ids
 
     @errors
-    def max_tracking_id(self, application_name: str) -> int:
+    def max_tracking_id(self, application_name: str) -> int | None:
         with self.serialize():
             q = NotificationTrackingRecord.objects.using(alias=self.using).filter(
                 application_name=self.application_name,
@@ -274,15 +286,9 @@ class DjangoProcessRecorder(DjangoApplicationRecorder, ProcessRecorder):
             try:
                 max_id = q[0].notification_id
             except IndexError:
-                max_id = 0
+                max_id = None
         return max_id
 
-    @errors
-    def has_tracking_id(self, application_name: str, notification_id: int) -> bool:
-        with self.serialize():
-            q = NotificationTrackingRecord.objects.using(alias=self.using).filter(
-                application_name=self.application_name,
-                upstream_application_name=application_name,
-                notification_id=notification_id,
-            )
-            return bool(q.count())
+    def insert_tracking(self, tracking: Tracking) -> None:
+        # TODO: Separate out a TrackingRecorder...
+        raise NotImplementedError

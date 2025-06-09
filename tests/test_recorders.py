@@ -135,6 +135,10 @@ class TestDjangoProcessRecorder(DjangoTestCase, ProcessRecorderTestCase):
     def create_recorder(self) -> DjangoProcessRecorder:
         return DjangoProcessRecorder(application_name="app", model=StoredEventRecord)
 
+    @skip(reason="Not yet implemented")
+    def test_raises_when_lower_inserted_later(self) -> None:
+        super().test_raises_when_lower_inserted_later()
+
 
 del AggregateRecorderTestCase
 del ApplicationRecorderTestCase

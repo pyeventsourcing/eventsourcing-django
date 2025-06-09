@@ -6,6 +6,7 @@ from eventsourcing.persistence import (
     ApplicationRecorder,
     InfrastructureFactory,
     ProcessRecorder,
+    TTrackingRecorder,
 )
 from eventsourcing.utils import Environment
 
@@ -46,3 +47,8 @@ class Factory(InfrastructureFactory):
             model=StoredEventRecord,
             using=self.db_alias,
         )
+
+    def tracking_recorder(
+        self, tracking_recorder_class: type[TTrackingRecorder] | None = None
+    ) -> TTrackingRecorder:
+        raise NotImplementedError

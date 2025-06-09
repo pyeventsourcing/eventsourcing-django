@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from typing import List
+from uuid import UUID
 
 from eventsourcing.application import Application
 
 from tests.training_school.domain import Dog
 
 
-class TrainingSchool(Application):
+class TrainingSchool(Application[UUID]):
     def register(self, name: str) -> None:
         dog = Dog(name)
         self.save(dog)

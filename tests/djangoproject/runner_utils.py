@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from typing import cast
+from uuid import UUID
 
 import eventsourcing.system
 from django.apps import apps
 
 
-def get_runner() -> eventsourcing.system.Runner:
+def get_runner() -> eventsourcing.system.Runner[UUID]:
     from tests.eventsourcing_runner_django.apps import EventSourcingSystemRunnerConfig
 
     app_config = cast(
@@ -16,7 +17,7 @@ def get_runner() -> eventsourcing.system.Runner:
     return app_config.es_runner
 
 
-def get_extra_runner() -> eventsourcing.system.Runner:
+def get_extra_runner() -> eventsourcing.system.Runner[UUID]:
     from tests.extra_eventsourcing_runner.apps import (
         ExtraEventSourcingSystemRunnerConfig,
     )

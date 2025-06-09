@@ -16,7 +16,7 @@ from eventsourcing_django.recorders import (
 from tests.test_recorders import DjangoTestCase
 
 
-class TestFactory(DjangoTestCase, InfrastructureFactoryTestCase):
+class TestFactory(DjangoTestCase, InfrastructureFactoryTestCase[Factory]):
     def setUp(self) -> None:
         self.env = Environment("TestCase")
         self.env[InfrastructureFactory.PERSISTENCE_MODULE] = Factory.__module__

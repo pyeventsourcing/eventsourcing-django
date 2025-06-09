@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib
 import os
 import types
+from uuid import UUID
 
 import eventsourcing.system
 from django.apps.registry import apps
@@ -23,7 +24,7 @@ def load_sync_followers_module() -> types.ModuleType:
 
 class TestSyncCommand(DjangoTestCase):
     django_db_alias = "default"
-    runner: eventsourcing.system.Runner
+    runner: eventsourcing.system.Runner[UUID]
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -44,7 +45,7 @@ class TestSyncCommand(DjangoTestCase):
     def tearDown(self) -> None:
         self.runner.stop()
 
-    def _create_leader_events(self) -> int:
+    def _create_leader_events(self) -> int | None:
         accounts = self.runner.get(BankAccounts)
         accounts.open_account(full_name="Alpha", email_address="alpha@example.com")
         accounts.open_account(full_name="Beta", email_address="beta@example.com")
@@ -59,8 +60,8 @@ class TestSyncCommand(DjangoTestCase):
         self.runner.start()
 
         # Both follower apps are unaware of the leader events.
-        self.assertEqual(formal_emails.recorder.max_tracking_id("BankAccounts"), 0)
-        self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+        self.assertIsNone(formal_emails.recorder.max_tracking_id("BankAccounts"))
+        self.assertIsNone(informal_emails.recorder.max_tracking_id("BankAccounts"))
 
         call_command("sync_followers", "FormalEmailProcess", verbosity=2)
 
@@ -70,7 +71,7 @@ class TestSyncCommand(DjangoTestCase):
             leader_notification_id,
         )
         # While the other remains unaware.
-        self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+        self.assertIsNone(informal_emails.recorder.max_tracking_id("BankAccounts"))
 
     def test_dry_run_sync_one_app(self) -> None:
         self._create_leader_events()
@@ -81,14 +82,14 @@ class TestSyncCommand(DjangoTestCase):
         self.runner.start()
 
         # Both follower apps are unaware of the leader events.
-        self.assertEqual(formal_emails.recorder.max_tracking_id("BankAccounts"), 0)
-        self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+        self.assertIsNone(formal_emails.recorder.max_tracking_id("BankAccounts"))
+        self.assertIsNone(informal_emails.recorder.max_tracking_id("BankAccounts"))
 
         call_command("sync_followers", "FormalEmailProcess", verbosity=2, dry_run=True)
 
         # Neither of the follower apps have been synced.
-        self.assertEqual(formal_emails.recorder.max_tracking_id("BankAccounts"), 0)
-        self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+        self.assertIsNone(formal_emails.recorder.max_tracking_id("BankAccounts"))
+        self.assertIsNone(informal_emails.recorder.max_tracking_id("BankAccounts"))
 
     def test_sync_all_apps(self) -> None:
         leader_notification_id = self._create_leader_events()
@@ -99,8 +100,8 @@ class TestSyncCommand(DjangoTestCase):
         self.runner.start()
 
         # Both follower apps are unaware of the leader events.
-        self.assertEqual(formal_emails.recorder.max_tracking_id("BankAccounts"), 0)
-        self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+        self.assertIsNone(formal_emails.recorder.max_tracking_id("BankAccounts"))
+        self.assertIsNone(informal_emails.recorder.max_tracking_id("BankAccounts"))
 
         call_command("sync_followers", verbosity=2)
 
@@ -123,14 +124,14 @@ class TestSyncCommand(DjangoTestCase):
         self.runner.start()
 
         # Both follower apps are unaware of the leader events.
-        self.assertEqual(formal_emails.recorder.max_tracking_id("BankAccounts"), 0)
-        self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+        self.assertIsNone(formal_emails.recorder.max_tracking_id("BankAccounts"))
+        self.assertIsNone(informal_emails.recorder.max_tracking_id("BankAccounts"))
 
         call_command("sync_followers", verbosity=2, dry_run=True)
 
         # Neither of the follower apps have been synced.
-        self.assertEqual(formal_emails.recorder.max_tracking_id("BankAccounts"), 0)
-        self.assertEqual(informal_emails.recorder.max_tracking_id("BankAccounts"), 0)
+        self.assertIsNone(formal_emails.recorder.max_tracking_id("BankAccounts"))
+        self.assertIsNone(informal_emails.recorder.max_tracking_id("BankAccounts"))
 
 
 @override_settings(EVENTSOURCING_RUNNER="eventsourcing_runner_django.es_runner")
@@ -215,7 +216,7 @@ class TestDefaultBehaviourWithTwoRunners(DjangoTestCase):
 
 
 class WithTwoRunnersMixin:
-    runner: eventsourcing.system.Runner
+    runner: eventsourcing.system.Runner[UUID]
 
     def setUp(self) -> None:
         runner_django_app = apps.get_app_config("extra_eventsourcing_runner")
