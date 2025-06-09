@@ -31,8 +31,8 @@ jobs:
         if: steps.cached-dependencies.outputs.cache-hit != 'true'
         run: |
             make install-packages opts="--no-root"
-            poetry run python -c "import django; print('Django', django.__version__)"
-            poetry run python -c "import psycopg2; print('Psycopg2', psycopg2.__version__)"
+            poetry@2.1.2 run python -c "import django; print('Django', django.__version__)"
+            poetry@2.1.2 run python -c "import psycopg2; print('Psycopg2', psycopg2.__version__)"
 
   lint:
     strategy:
