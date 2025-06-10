@@ -354,3 +354,70 @@ Django setting `EVENTSOURCING_RUNNER` in one of two ways:
    ```
 
 All runner classes shipped with the `eventsourcing` library are compatible.
+
+### Reset Follower
+
+Manually reset the tracking states of a follower (i.e. a `ProcessApplication` instance).
+
+The outcome of running this command is that the follower will basically "forget" it did
+see events from upstream apps. The next time the follower pulls new notifications
+(either manually with `sync_follower` or automatically based on the
+`eventsourcing.system.Runner` behaviour), it will basically replay the history of the
+upstream apps.
+
+There are two ways of supporting this feature in a `ProcessApplication`:
+1. The app policy is stateless; or,
+2. The app implements the `ResetableFollower` protocol.
+
+We will describe these two cases after illustrating the command usage.
+
+#### Usage
+
+```shell
+$ python manage.py reset_follower [-n] [-u app [app ...]] [-v {0,1,2,3}] [follower]
+```
+
+Where `follower` denotes the name of a follower to reset the tracking states of. If you
+do not give a follower name, the command will list the follower names it would accept.
+
+Relevant options:
+
+  - `-n`, `--dry-run`: Reset the tracking states, and then roll back the changes.
+  - `-u`, `--upstream-apps`: The upstream apps to reset the tracking state of. Defaults
+    (empty list) to reset the tracking states of all upstream apps.
+  - `-v {0,1,2,3}`, `--verbosity {0,1,2,3}`: Verbosity level; 0=minimal output, 1=normal
+    output, 2=verbose output, 3=very verbose output.
+
+For a full list of options, pass the `--help` flag to the command.
+
+#### Examples
+
+  - To list all followers you could reset the tracking states of:
+
+      ```shell
+      $ python manage.py reset_follower
+      ```
+
+  - To reset the tracking states of a follower:
+
+      ```shell
+      $ python manage.py reset_follower TrainingSchool
+      ```
+
+  - To reset the tracking states of a follower, for a single upstream app (using
+    `BoardingSchool` as an illustrative application here):
+
+      ```shell
+      $ python manage.py reset_follower --upstream-apps BoardingSchool TrainingSchool
+      ```
+
+The command supports the regular `-v/--verbosity` optional argument, as well as a
+`-n/--dry-run` flag.
+
+#### Case 1: stateless policy
+
+TODO
+
+#### Case 2: reset-able follower
+
+TODO
